@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx shadcn:*)",
+      "Bash(grep -n \"useState\\\\|useEffect\\\\|useMemo\" src/features/dashboard/components/*.tsx)",
+      "Bash(npx shadcn@latest init --defaults)"
+    ]
+  }
+}
