@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, NavLink } from 'react-router-dom'
-import type { LoginRequest } from '../../features/auth/api'
-import { login } from '../../features/auth/api'
-import { startSession } from '../../features/auth/session'
+import type { LoginRequest } from '@/features/auth/api.ts'
+import { login } from '@/features/auth/api.ts'
+import { startSession } from '@/features/auth/session.ts'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { GradientText } from '@/components/GradientText'
 
 export default function LoginPage() {
     const navigate = useNavigate()
@@ -20,7 +24,7 @@ export default function LoginPage() {
             const res = await login(form)
             startSession(res)
             navigate('/dashboard')
-        } catch (err) {
+        } catch {
             setError('Login failed. Please check your email and password.')
         } finally {
             setIsSubmitting(false)
@@ -28,52 +32,64 @@ export default function LoginPage() {
     }
 
     return (
-        <>
-            <h1>Login</h1>
+        <div className="space-y-6">
+            <div className="text-center space-y-1">
+                <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
+                <p className="text-sm text-muted-foreground">
+                    Sign in to your <GradientText>Blink Pay</GradientText> account
+                </p>
+            </div>
 
-            <form onSubmit={onSubmit} style={{ display: 'grid', gap: '12px' }}>
-                <label>
-                    Email
-                    <input
+            <form onSubmit={onSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground">Email</Label>
+                    <Input
+                        id="email"
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         type="email"
                         autoComplete="email"
                         required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
+                        placeholder="you@example.com"
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                </label>
+                </div>
 
-                <label>
-                    Password
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="password" className="text-foreground">Password</Label>
+                    <Input
+                        id="password"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                         type="password"
                         autoComplete="current-password"
                         required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
+                        placeholder="••••••••"
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                </label>
+                </div>
 
                 {error && (
-                    <div style={{ padding: '10px', border: '1px solid #f2caca' }}>
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                         {error}
                     </div>
                 )}
 
-                <button
+                <Button
                     type="submit"
                     disabled={isSubmitting}
-                    style={{ padding: '10px', cursor: 'pointer' }}
+                    className="w-full bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold h-11 shadow-md shadow-[#00D4B8]/20 cursor-pointer"
                 >
-                    {isSubmitting ? 'Signing in...' : 'Login'}
-                </button>
+                    {isSubmitting ? 'Signing in...' : 'Sign in'}
+                </Button>
             </form>
 
-            <p style={{ marginTop: '16px' }}>
-                Don’t have an account? <NavLink to="/signup">Sign up</NavLink>
+            <p className="text-center text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <NavLink to="/signup" className="text-[#00D4B8] hover:underline font-medium no-underline">
+                    Sign up
+                </NavLink>
             </p>
-        </>
+        </div>
     )
 }

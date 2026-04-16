@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, NavLink } from 'react-router-dom'
-import type { RegisterRequest } from '../../features/auth/api'
-import { register } from '../../features/auth/api'
-import { startSession } from '../../features/auth/session'
+import type { RegisterRequest } from '@/features/auth/api.ts'
+import { register } from '@/features/auth/api.ts'
+import { startSession } from '@/features/auth/session.ts'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { GradientText } from '@/components/GradientText'
 
 type SignupForm = RegisterRequest & { confirmPassword: string }
 
@@ -48,7 +52,7 @@ export default function SignupPage() {
             const res = await register(payload)
             startSession(res)
             navigate('/dashboard')
-        } catch (err) {
+        } catch {
             setError('Signup failed. Please verify your details and try again.')
         } finally {
             setIsSubmitting(false)
@@ -56,94 +60,112 @@ export default function SignupPage() {
     }
 
     return (
-        <>
-            <h1>Sign Up</h1>
+        <div className="space-y-6">
+            <div className="text-center space-y-1">
+                <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
+                <p className="text-sm text-muted-foreground">
+                    Get started with <GradientText>Blink Pay</GradientText> today
+                </p>
+            </div>
 
-            <form onSubmit={onSubmit} style={{ display: 'grid', gap: '12px' }}>
-                <label>
-                    First Name
-                    <input
-                        value={form.firstName}
-                        onChange={(e) => set('firstName', e.target.value)}
-                        required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
-                    />
-                </label>
+            <form onSubmit={onSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="firstName" className="text-foreground">First Name</Label>
+                        <Input
+                            id="firstName"
+                            value={form.firstName}
+                            onChange={(e) => set('firstName', e.target.value)}
+                            autoComplete="given-name"
+                            required
+                            className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="lastName" className="text-foreground">Last Name</Label>
+                        <Input
+                            id="lastName"
+                            value={form.lastName}
+                            onChange={(e) => set('lastName', e.target.value)}
+                            autoComplete="family-name"
+                            required
+                            className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
+                        />
+                    </div>
+                </div>
 
-                <label>
-                    Last Name
-                    <input
-                        value={form.lastName}
-                        onChange={(e) => set('lastName', e.target.value)}
-                        required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
-                    />
-                </label>
-
-                <label>
-                    Username
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="username" className="text-foreground">Username</Label>
+                    <Input
+                        id="username"
                         value={form.username}
                         onChange={(e) => set('username', e.target.value)}
+                        autoComplete="username"
                         required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                </label>
+                </div>
 
-                <label>
-                    Email
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground">Email</Label>
+                    <Input
+                        id="email"
                         value={form.email}
                         onChange={(e) => set('email', e.target.value)}
                         type="email"
                         autoComplete="email"
                         required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                </label>
+                </div>
 
-                <label>
-                    Password
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="password" className="text-foreground">Password</Label>
+                    <Input
+                        id="password"
                         value={form.password}
                         onChange={(e) => set('password', e.target.value)}
                         type="password"
                         autoComplete="new-password"
                         required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                </label>
+                </div>
 
-                <label>
-                    Confirm Password
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-foreground">Confirm Password</Label>
+                    <Input
+                        id="confirmPassword"
                         value={form.confirmPassword}
                         onChange={(e) => set('confirmPassword', e.target.value)}
                         type="password"
                         autoComplete="new-password"
                         required
-                        style={{ width: '100%', padding: '10px', marginTop: '6px' }}
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                </label>
+                </div>
 
                 {error && (
-                    <div style={{ padding: '10px', border: '1px solid #f2caca' }}>
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                         {error}
                     </div>
                 )}
 
-                <button
+                <Button
                     type="submit"
                     disabled={isSubmitting}
-                    style={{ padding: '10px', cursor: 'pointer' }}
+                    className="w-full bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold h-11 shadow-md shadow-[#00D4B8]/20 cursor-pointer"
                 >
                     {isSubmitting ? 'Creating account...' : 'Create account'}
-                </button>
+                </Button>
             </form>
 
-            <p style={{ marginTop: '16px' }}>
-                Already have an account? <NavLink to="/login">Login</NavLink>
+            <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <NavLink to="/login" className="text-[#00D4B8] hover:underline font-medium no-underline">
+                    Sign in
+                </NavLink>
             </p>
-        </>
+        </div>
     )
 }

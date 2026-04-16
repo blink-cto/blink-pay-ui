@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react'
+import type { ReactNode } from 'react'
 import Navbar from './Navbar'
 
 type Props = {
@@ -7,17 +7,11 @@ type Props = {
 
 export default function AppLayout({ children }: Props) {
     return (
-        <>
+        <div className="min-h-screen bg-background flex flex-col">
             <Navbar />
-            <main
-                style={{
-                    maxWidth: '1200px',
-                    margin: '0 auto',
-                    padding: '24px'
-                }}
-            >
+            <main className="flex-1">
                 {children}
             </main>
-        </>
+        </div>
     )
 }

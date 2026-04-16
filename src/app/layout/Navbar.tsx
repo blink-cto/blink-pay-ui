@@ -1,14 +1,16 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import logo from '../../assets/logo.png'
-import { endSession } from '../../features/auth/session'
-import { getStoredUser } from '../../features/auth/sessionState'
+import { endSession } from '@/features/auth/session.ts'
+import { getStoredUser } from '@/features/auth/sessionState.ts'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
-const linkStyle = ({ isActive }: { isActive: boolean }) => ({
-    textDecoration: 'none',
-    color: isActive ? '#111' : '#555',
-    fontWeight: isActive ? 600 : 400
-})
+const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+        'text-sm font-medium transition-colors duration-200 no-underline',
+        isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+    )
 
 export default function Navbar() {
     const navigate = useNavigate()
@@ -16,18 +18,14 @@ export default function Navbar() {
 
     useEffect(() => {
         const sync = () => setUser(getStoredUser())
-
         sync()
         window.addEventListener('storage', sync)
         window.addEventListener('auth:changed', sync)
-
         return () => {
             window.removeEventListener('storage', sync)
             window.removeEventListener('auth:changed', sync)
         }
     }, [])
-
-
 
     function logout() {
         endSession()
@@ -36,56 +34,43 @@ export default function Navbar() {
     }
 
     return (
-        <header style={{ borderBottom: '1px solid #eee' }}>
-            <div
-                style={{
-                    maxWidth: '1200px',
-                    margin: '0 auto',
-                    padding: '16px 24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                }}
-            >
-                <NavLink to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <img src={logo} alt="Blink Pay" style={{ height: '32px' }} />
-                        <strong>Blink Pay</strong>
-                    </div>
+        <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+            <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
+                <NavLink to="/" className="flex items-center gap-3 text-foreground no-underline">
+                    <img src={logo} alt="Blink Pay" className="h-8 w-auto" />
+                    <span className="font-bold text-lg tracking-tight">Blink Pay</span>
                 </NavLink>
 
-                <nav style={{ display: 'flex', gap: '24px' }}>
-                    <NavLink to="/" style={linkStyle} end>
-                        Home
-                    </NavLink>
-
-                    <NavLink to="/about" style={linkStyle}>
-                        About
-                    </NavLink>
-
-                    <NavLink to="/contact" style={linkStyle}>
-                        Contact Us
-                    </NavLink>
+                <nav className="flex items-center gap-6">
+                    <NavLink to="/" className={navLinkClass} end>Home</NavLink>
+                    <NavLink to="/about" className={navLinkClass}>About</NavLink>
+                    <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
                 </nav>
 
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <div className="flex items-center gap-3">
                     {user ? (
                         <>
-                            <span style={{ color: '#555' }}>Hi, {user.firstName}</span>
-                            <button
+                            <span className="text-sm text-muted-foreground">Hi, {user.firstName}</span>
+                            <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={logout}
-                                style={{ padding: '8px 12px', cursor: 'pointer' }}
+                                className="border-border text-foreground hover:bg-secondary cursor-pointer"
                             >
                                 Logout
-                            </button>
+                            </Button>
                         </>
                     ) : (
                         <>
-                            <NavLink to="/login" style={linkStyle}>
-                                Login
+                            <NavLink to="/login">
+                                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground cursor-pointer">
+                                    Login
+                                </Button>
                             </NavLink>
-                            <NavLink to="/signup" style={linkStyle}>
-                                Sign Up
+                            <NavLink to="/signup">
+                                <Button size="sm" className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold cursor-pointer">
+                                    Sign Up
+                                </Button>
                             </NavLink>
                         </>
                     )}
