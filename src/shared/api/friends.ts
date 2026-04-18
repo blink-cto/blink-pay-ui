@@ -1,14 +1,18 @@
 import { http } from './http'
 import type {
-    BasicActionResponse,
+    FriendItem,
     FriendRequestCreateRequest,
     FriendRequestItem,
-    FriendRequestRespondRequest
+    FriendRequestRespondRequest,
 } from '../types/api'
 
-export async function sendFriendRequest(payload: FriendRequestCreateRequest): Promise<BasicActionResponse> {
-    const res = await http.post<BasicActionResponse>('/api/friends/request', payload)
+export async function getFriends(): Promise<FriendItem[]> {
+    const res = await http.get<FriendItem[]>('/api/friends')
     return res.data
+}
+
+export async function sendFriendRequest(payload: FriendRequestCreateRequest): Promise<void> {
+    await http.post('/api/friends/request', payload)
 }
 
 export async function getIncomingFriendRequests(): Promise<FriendRequestItem[]> {
@@ -16,7 +20,6 @@ export async function getIncomingFriendRequests(): Promise<FriendRequestItem[]> 
     return res.data
 }
 
-export async function respondToFriendRequest(payload: FriendRequestRespondRequest): Promise<BasicActionResponse> {
-    const res = await http.post<BasicActionResponse>('/api/friends/respond', payload)
-    return res.data
+export async function respondToFriendRequest(payload: FriendRequestRespondRequest): Promise<void> {
+    await http.post('/api/friends/respond', payload)
 }

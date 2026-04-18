@@ -6,7 +6,17 @@ export async function getMyWallet(): Promise<WalletResponse> {
     return res.data
 }
 
-export async function initiateTopUp(amount: number): Promise<TopUpInitiateResponse> {
+export async function initiateTopUp(amount: string): Promise<TopUpInitiateResponse> {
     const res = await http.post<TopUpInitiateResponse>('/api/wallets/top-up/initiate', { amount })
+    return res.data
+}
+
+export async function directTopUp(amount: number): Promise<WalletResponse> {
+    const res = await http.post<WalletResponse>('/api/wallets/top-up', { amount })
+    return res.data
+}
+
+export async function cashOut(amount: number): Promise<WalletResponse> {
+    const res = await http.post<WalletResponse>('/api/wallets/cashout', { amount })
     return res.data
 }

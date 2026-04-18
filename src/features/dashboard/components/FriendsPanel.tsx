@@ -6,6 +6,8 @@ import {
     sendFriendRequest
 } from '../../../shared/api/friends'
 import type { FriendRequestItem, UserSearchItem } from '../../../shared/types/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function FriendsPanel() {
     // Search
@@ -14,7 +16,6 @@ export default function FriendsPanel() {
     const [searchLoading, setSearchLoading] = useState(false)
     const [searchError, setSearchError] = useState<string | null>(null)
     const [hasSearched, setHasSearched] = useState(false)
-
 
     // Incoming requests
     const [incoming, setIncoming] = useState<FriendRequestItem[]>([])
@@ -28,16 +29,9 @@ export default function FriendsPanel() {
 
     useEffect(() => {
         const q = query.trim()
-
-        if (q.length < 3) {
-            setResults([])
-            setHasSearched(false)
-            return
-        }
-
+        if (q.length < 3) { setResults([]); setHasSearched(false); return }
         setSearchLoading(true)
         setHasSearched(true)
-
         const timeout = setTimeout(async () => {
             try {
                 const res = await searchUsers(q)
@@ -47,18 +41,15 @@ export default function FriendsPanel() {
             } finally {
                 setSearchLoading(false)
             }
-        }, 300) // debounce delay
-
+        }, 300)
         return () => clearTimeout(timeout)
     }, [query])
-
 
     async function loadIncoming() {
         setIncomingError(null)
         setIncomingLoading(true)
         try {
-            const res = await getIncomingFriendRequests()
-            setIncoming(res)
+            setIncoming(await getIncomingFriendRequests())
         } catch {
             setIncomingError('Failed to load incoming requests.')
         } finally {
@@ -66,25 +57,15 @@ export default function FriendsPanel() {
         }
     }
 
-    useEffect(() => {
-        void loadIncoming()
-    }, [])
+    useEffect(() => { void loadIncoming() }, [])
 
     async function onSearch() {
-        setActionMsg(null)
-        setActionErr(null)
-        setSearchError(null)
-
+        setActionMsg(null); setActionErr(null); setSearchError(null)
         const q = query.trim()
-        if (!q) {
-            setResults([])
-            return
-        }
-
+        if (!q) { setResults([]); return }
         setSearchLoading(true)
         try {
-            const res = await searchUsers(q)
-            setResults(res)
+            setResults(await searchUsers(q))
         } catch {
             setSearchError('User search failed.')
         } finally {
@@ -93,10 +74,7 @@ export default function FriendsPanel() {
     }
 
     async function onSendRequest(receiverId: number) {
-        setActionMsg(null)
-        setActionErr(null)
-        setBusyId(receiverId)
-
+        setActionMsg(null); setActionErr(null); setBusyId(receiverId)
         try {
             await sendFriendRequest({ receiverId })
             setActionMsg('Friend request sent.')
@@ -108,10 +86,7 @@ export default function FriendsPanel() {
     }
 
     async function onRespond(requestId: number, action: 'ACCEPTED' | 'REJECTED') {
-        setActionMsg(null)
-        setActionErr(null)
-        setBusyId(requestId)
-
+        setActionMsg(null); setActionErr(null); setBusyId(requestId)
         try {
             await respondToFriendRequest({ requestId, action })
             setActionMsg(action === 'ACCEPTED' ? 'Request accepted.' : 'Request rejected.')
@@ -124,131 +99,124 @@ export default function FriendsPanel() {
     }
 
     return (
-        <div style={{ display: 'grid', gap: '16px' }}>
+        <div className="grid gap-5">
             <div>
-                <h2 style={{ marginTop: 0 }}>Friends</h2>
-                <div style={{ color: '#555' }}>Search users and manage incoming requests.</div>
+                <h2 className="text-xl font-bold text-foreground mb-1">Friends</h2>
+                <p className="text-sm text-muted-foreground">Search users and manage incoming requests.</p>
             </div>
 
             {(actionMsg || actionErr) && (
-                <div style={{ padding: '10px', border: `1px solid ${actionErr ? '#f2caca' : '#cdeccd'}` }}>
+                <div className={`rounded-lg border px-4 py-3 text-sm ${
+                    actionErr
+                        ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                        : 'border-[#00D4B8]/30 bg-[#00D4B8]/10 text-[#00D4B8]'
+                }`}>
                     {actionErr ?? actionMsg}
                 </div>
             )}
 
             {/* Search */}
-            <section style={{ border: '1px solid #eee', borderRadius: '12px', padding: '12px' }}>
-                <h3 style={{ marginTop: 0 }}>Find users</h3>
-
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <input
+            <section className="border border-border rounded-xl p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-3">Find users</h3>
+                <div className="flex gap-3">
+                    <Input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search by name or username"
-                        style={{ padding: '10px', flex: 1 }}
+                        placeholder="Search by name or username (min 3 chars)"
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                    <button onClick={onSearch} disabled={searchLoading} style={{ padding: '10px 14px', cursor: 'pointer' }}>
+                    <Button
+                        onClick={onSearch}
+                        disabled={searchLoading}
+                        className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold shrink-0 cursor-pointer"
+                    >
                         {searchLoading ? 'Searching…' : 'Search'}
-                    </button>
+                    </Button>
                 </div>
 
                 {searchError && (
-                    <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #f2caca' }}>
+                    <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                         {searchError}
                     </div>
                 )}
 
-                <div style={{ marginTop: '12px', display: 'grid', gap: '10px' }}>
+                <div className="mt-3 grid gap-2">
                     {results.map((u) => (
-                        <div
-                            key={u.userId}
-                            style={{
-                                border: '1px solid #f2f2f2',
-                                borderRadius: '10px',
-                                padding: '10px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                gap: '12px'
-                            }}
-                        >
+                        <div key={u.id} className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
                             <div>
-                                <div style={{ fontWeight: 600 }}>
-                                    {u.firstName} {u.lastName} <span style={{ color: '#777' }}>@{u.username}</span>
+                                <div className="font-semibold text-foreground text-sm">
+                                    {u.firstName} {u.lastName}{' '}
+                                    <span className="text-muted-foreground font-normal">@{u.username}</span>
                                 </div>
-                                <div style={{ color: '#777' }}>User ID: {u.userId}</div>
                             </div>
-
-                            <button
-                                onClick={() => onSendRequest(u.userId)}
-                                disabled={busyId === u.userId}
-                                style={{ padding: '10px 14px', cursor: 'pointer' }}
+                            <Button
+                                size="sm"
+                                onClick={() => onSendRequest(u.id)}
+                                disabled={busyId === u.id}
+                                variant="outline"
+                                className="border-[#00D4B8]/40 text-[#00D4B8] hover:bg-[#00D4B8]/10 shrink-0 cursor-pointer"
                             >
-                                {busyId === u.userId ? 'Sending…' : 'Add Friend'}
-                            </button>
+                                {busyId === u.id ? 'Sending…' : 'Add Friend'}
+                            </Button>
                         </div>
                     ))}
-
                     {hasSearched && !searchLoading && results.length === 0 && (
-                        <div style={{ color: '#777' }}>No users found.</div>
+                        <div className="text-sm text-muted-foreground">No users found.</div>
                     )}
                 </div>
             </section>
 
-            {/* Incoming */}
-            <section style={{ border: '1px solid #eee', borderRadius: '12px', padding: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
-                    <h3 style={{ marginTop: 0 }}>Incoming requests</h3>
-                    <button onClick={loadIncoming} style={{ padding: '10px 14px', cursor: 'pointer' }}>
+            {/* Incoming requests */}
+            <section className="border border-border rounded-xl p-4">
+                <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-sm font-semibold text-foreground">Incoming requests</h3>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={loadIncoming}
+                        className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
                         Refresh
-                    </button>
+                    </Button>
                 </div>
 
                 {incomingLoading ? (
-                    <div>Loading incoming requests…</div>
+                    <div className="text-sm text-muted-foreground">Loading...</div>
                 ) : incomingError ? (
-                    <div>{incomingError}</div>
+                    <div className="text-sm text-destructive">{incomingError}</div>
                 ) : incoming.length === 0 ? (
-                    <div style={{ color: '#777' }}>No incoming requests.</div>
+                    <div className="text-sm text-muted-foreground">No incoming requests.</div>
                 ) : (
-                    <div style={{ display: 'grid', gap: '10px' }}>
+                    <div className="grid gap-2">
                         {incoming.map((r) => (
-                            <div
-                                key={r.requestId}
-                                style={{
-                                    border: '1px solid #f2f2f2',
-                                    borderRadius: '10px',
-                                    padding: '10px',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    gap: '12px'
-                                }}
-                            >
+                            <div key={r.id} className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
                                 <div>
-                                    <div style={{ fontWeight: 600 }}>
-                                        {r.senderFirstName} <span style={{ color: '#777' }}>({r.senderEmail})</span>
+                                    <div className="font-semibold text-foreground text-sm">
+                                        {r.senderFirstName}{' '}
+                                        <span className="text-muted-foreground font-normal">@{r.senderUsername}</span>
                                     </div>
-                                    <div style={{ color: '#777' }}>
+                                    <div className="text-xs text-muted-foreground">
                                         {new Date(r.createdAt).toLocaleString()}
                                     </div>
                                 </div>
-
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button
-                                        onClick={() => onRespond(r.requestId, 'ACCEPTED')}
-                                        disabled={busyId === r.requestId}
-                                        style={{ padding: '10px 14px', cursor: 'pointer' }}
+                                <div className="flex gap-2 shrink-0">
+                                    <Button
+                                        size="sm"
+                                        onClick={() => onRespond(r.id, 'ACCEPTED')}
+                                        disabled={busyId === r.id}
+                                        className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold cursor-pointer"
                                     >
-                                        {busyId === r.requestId ? '…' : 'Accept'}
-                                    </button>
-                                    <button
-                                        onClick={() => onRespond(r.requestId, 'REJECTED')}
-                                        disabled={busyId === r.requestId}
-                                        style={{ padding: '10px 14px', cursor: 'pointer' }}
+                                        {busyId === r.id ? '…' : 'Accept'}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => onRespond(r.id, 'REJECTED')}
+                                        disabled={busyId === r.id}
+                                        className="border-destructive/40 text-destructive hover:bg-destructive/10 cursor-pointer"
                                     >
-                                        {busyId === r.requestId ? '…' : 'Reject'}
-                                    </button>
+                                        {busyId === r.id ? '…' : 'Reject'}
+                                    </Button>
                                 </div>
                             </div>
                         ))}

@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react'
-import { getInwardHistory, getOutwardHistory } from '../../../shared/api/history'
-import type { TransactionHistoryItem } from '../../../shared/types/api'
+import { getTransactionFeed } from '../../../shared/api/history'
+import type { TransactionDto } from '../../../shared/types/api'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+const typeLabel: Record<TransactionDto['type'], string> = {
+    SEND: 'Send',
+    SPLIT: 'Split',
+    TOP_UP: 'Top Up',
+    SETTLE: 'Settle',
+    WITHDRAW: 'Cashout',
+}
 
 export default function HistoryPanel() {
-    const [inward, setInward] = useState<TransactionHistoryItem[]>([])
-    const [outward, setOutward] = useState<TransactionHistoryItem[]>([])
+    const [feed, setFeed] = useState<TransactionDto[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -12,12 +21,7 @@ export default function HistoryPanel() {
         setError(null)
         setLoading(true)
         try {
-            const [inRes, outRes] = await Promise.all([
-                getInwardHistory(),
-                getOutwardHistory()
-            ])
-            setInward(inRes)
-            setOutward(outRes)
+            setFeed(await getTransactionFeed())
         } catch {
             setError('Failed to load transaction history.')
         } finally {
@@ -25,78 +29,69 @@ export default function HistoryPanel() {
         }
     }
 
-    useEffect(() => {
-        void load()
-    }, [])
+    useEffect(() => { void load() }, [])
 
-    if (loading) return <div>Loading history...</div>
-    if (error) return <div>{error}</div>
+    if (loading) return <div className="text-muted-foreground">Loading history...</div>
+    if (error) return <div className="text-destructive">{error}</div>
 
     return (
-        <div style={{ display: 'grid', gap: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
+        <div className="grid gap-5">
+            <div className="flex justify-between items-end">
                 <div>
-                    <h2 style={{ marginTop: 0 }}>History</h2>
-                    <div style={{ color: '#555' }}>Inward and outward transactions.</div>
+                    <h2 className="text-xl font-bold text-foreground mb-1">History</h2>
+                    <p className="text-sm text-muted-foreground">All transactions, newest first.</p>
                 </div>
-
-                <button onClick={load} style={{ padding: '10px 14px', cursor: 'pointer' }}>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={load}
+                    className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+                >
                     Refresh
-                </button>
+                </Button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                {/* Outward */}
-                <div style={{ border: '1px solid #eee', borderRadius: '12px', padding: '12px' }}>
-                    <h3 style={{ marginTop: 0 }}>Outward</h3>
-                    {outward.length === 0 ? (
-                        <div style={{ color: '#777' }}>No outward transactions yet.</div>
-                    ) : (
-                        <div style={{ display: 'grid', gap: '10px' }}>
-                            {outward.map((t) => (
-                                <HistoryRow key={t.id} t={t} />
-                            ))}
-                        </div>
-                    )}
+            {feed.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No transactions yet.</div>
+            ) : (
+                <div className="grid gap-2">
+                    {feed.map((t) => <TxRow key={t.id} t={t} />)}
                 </div>
-
-                {/* Inward */}
-                <div style={{ border: '1px solid #eee', borderRadius: '12px', padding: '12px' }}>
-                    <h3 style={{ marginTop: 0 }}>Inward</h3>
-                    {inward.length === 0 ? (
-                        <div style={{ color: '#777' }}>No inward transactions yet.</div>
-                    ) : (
-                        <div style={{ display: 'grid', gap: '10px' }}>
-                            {inward.map((t) => (
-                                <HistoryRow key={t.id} t={t} />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
+            )}
         </div>
     )
 }
 
-function HistoryRow({ t }: { t: TransactionHistoryItem }) {
+function TxRow({ t }: { t: TransactionDto }) {
+    const isReceived = t.direction === 'RECEIVED' || t.type === 'TOP_UP'
+    const counterparty = isReceived ? t.fromUser : t.toUser
+
     return (
-        <div
-            style={{
-                border: '1px solid #f2f2f2',
-                borderRadius: '10px',
-                padding: '10px',
-                display: 'grid',
-                gap: '4px'
-            }}
-        >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                <div style={{ fontWeight: 700 }}>R {t.amount}</div>
-                <div style={{ color: '#777' }}>{new Date(t.timestamp).toLocaleString()}</div>
+        <div className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
+            <div className="grid gap-0.5 min-w-0">
+                <div className="flex items-center gap-2">
+                    <span className={cn(
+                        'text-xs font-semibold px-2 py-0.5 rounded-full',
+                        isReceived
+                            ? 'bg-[#00D4B8]/10 text-[#00D4B8]'
+                            : 'bg-[#FF2D78]/10 text-[#FF2D78]'
+                    )}>
+                        {typeLabel[t.type]}
+                    </span>
+                    {counterparty && (
+                        <span className="text-sm text-foreground font-medium truncate">
+                            {isReceived ? 'from' : 'to'} {counterparty.firstName}
+                        </span>
+                    )}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                    {t.note || t.reference || 'No note'} · {new Date(t.timestamp).toLocaleString()}
+                </div>
             </div>
-            <div style={{ color: '#555' }}>
-                {t.reference || 'No reference'}
+
+            <div className={cn('font-bold text-base shrink-0', isReceived ? 'text-[#00D4B8]' : 'text-[#FF2D78]')}>
+                {isReceived ? '+' : '-'} R {t.amount}
             </div>
-            <div style={{ color: '#777' }}>Type: {t.type}</div>
         </div>
     )
 }

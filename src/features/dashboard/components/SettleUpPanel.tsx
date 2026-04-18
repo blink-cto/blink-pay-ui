@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getMyDebts } from '../../../shared/api/debts'
 import { settleDebt } from '../../../shared/api/payments'
 import type { DebtItem } from '../../../shared/types/api'
+import { Button } from '@/components/ui/button'
 
 export default function SettleUpPanel() {
     const [debts, setDebts] = useState<DebtItem[]>([])
@@ -16,8 +17,7 @@ export default function SettleUpPanel() {
         setActionError(null)
         setLoading(true)
         try {
-            const res = await getMyDebts()
-            setDebts(res)
+            setDebts(await getMyDebts())
         } catch {
             setError('Failed to load debts.')
         } finally {
@@ -25,94 +25,82 @@ export default function SettleUpPanel() {
         }
     }
 
-    useEffect(() => {
-        void load()
-    }, [])
+    useEffect(() => { void load() }, [])
 
     async function onSettle(debtId: number) {
         setActionError(null)
         setSettlingId(debtId)
         try {
-            const res = await settleDebt({ debtId })
-            if (!res.success) {
-                setActionError(res.message || 'Settle failed.')
-                return
-            }
-            // refresh list after settle
+            await settleDebt({ debtId })
             await load()
-        } catch {
-            setActionError('Settle failed.')
+        } catch (e) {
+            setActionError(e instanceof Error ? e.message : 'Settle failed.')
         } finally {
             setSettlingId(null)
         }
     }
 
-    if (loading) return <div>Loading debts...</div>
-    if (error) return <div>{error}</div>
+    if (loading) return <div className="text-muted-foreground">Loading debts...</div>
+    if (error) return <div className="text-destructive">{error}</div>
 
     return (
-        <div style={{ display: 'grid', gap: '12px' }}>
-            <div>
-                <h2 style={{ marginTop: 0 }}>Settle Up</h2>
-                <p style={{ margin: 0, color: '#555' }}>
-                    Outstanding debts you can settle.
-                </p>
+        <div className="grid gap-5">
+            <div className="flex justify-between items-end">
+                <div>
+                    <h2 className="text-xl font-bold text-foreground mb-1">Settle Up</h2>
+                    <p className="text-sm text-muted-foreground">Outstanding debts you can settle.</p>
+                </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={load}
+                    className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                    Refresh
+                </Button>
             </div>
 
             {actionError && (
-                <div style={{ padding: '10px', border: '1px solid #f2caca' }}>
+                <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {actionError}
                 </div>
             )}
 
             {debts.length === 0 ? (
-                <div style={{ padding: '12px', border: '1px solid #eee' }}>
-                    No outstanding debts 🎉
+                <div className="border border-[#00D4B8]/20 bg-[#00D4B8]/5 rounded-xl p-6 text-center">
+                    <div className="text-2xl mb-2">🎉</div>
+                    <div className="text-foreground font-semibold">All clear!</div>
+                    <div className="text-sm text-muted-foreground mt-1">No outstanding debts.</div>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gap: '10px' }}>
+                <div className="grid gap-3">
                     {debts.map((d) => (
-                        <div
-                            key={d.debtId}
-                            style={{
-                                border: '1px solid #eee',
-                                borderRadius: '12px',
-                                padding: '12px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                gap: '12px'
-                            }}
-                        >
-                            <div style={{ display: 'grid', gap: '4px' }}>
-                                <div style={{ fontWeight: 600 }}>
-                                    Owe {d.toUserFirstName} ({d.toUserEmail})
+                        <div key={d.debtId} className="border border-border rounded-xl p-4 flex justify-between items-center gap-4 bg-secondary/30">
+                            <div className="grid gap-1">
+                                <div className="font-semibold text-foreground">
+                                    Owe {d.toUserFirstName}
+                                    <span className="text-muted-foreground font-normal ml-1">({d.toUserEmail})</span>
                                 </div>
-                                <div style={{ color: '#555' }}>
-                                    {d.reference || 'No reference'} • {new Date(d.createdAt).toLocaleString()}
+                                <div className="text-sm text-muted-foreground">
+                                    {d.reference || 'No reference'} · {new Date(d.createdAt).toLocaleString()}
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <div style={{ fontWeight: 700 }}>R {d.amount}</div>
-                                <button
+                            <div className="flex items-center gap-4 shrink-0">
+                                <div className="font-bold text-lg text-[#FF2D78]">R {d.amount}</div>
+                                <Button
+                                    size="sm"
                                     onClick={() => onSettle(d.debtId)}
                                     disabled={settlingId === d.debtId}
-                                    style={{ padding: '10px 14px', cursor: 'pointer' }}
+                                    className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold cursor-pointer"
                                 >
                                     {settlingId === d.debtId ? 'Settling...' : 'Settle'}
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ))}
                 </div>
             )}
-
-            <div>
-                <button onClick={load} style={{ padding: '10px 14px', cursor: 'pointer' }}>
-                    Refresh
-                </button>
-            </div>
         </div>
     )
 }

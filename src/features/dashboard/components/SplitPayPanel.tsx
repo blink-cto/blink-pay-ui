@@ -2,39 +2,31 @@ import { useState } from 'react'
 import { searchUsers } from '../../../shared/api/users'
 import { splitPayment } from '../../../shared/api/payments'
 import type { SplitPaymentRequest, UserSearchItem } from '../../../shared/types/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function SplitPayPanel() {
-    // Split form
     const [totalAmount, setTotalAmount] = useState<number>(100)
     const [reference, setReference] = useState<string>('')
     const [participants, setParticipants] = useState<UserSearchItem[]>([])
 
-    // Search
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<UserSearchItem[]>([])
     const [searchLoading, setSearchLoading] = useState(false)
     const [searchError, setSearchError] = useState<string | null>(null)
 
-    // Submit
     const [submitting, setSubmitting] = useState(false)
     const [msg, setMsg] = useState<string | null>(null)
     const [err, setErr] = useState<string | null>(null)
 
     async function onSearch() {
-        setMsg(null)
-        setErr(null)
-        setSearchError(null)
-
+        setMsg(null); setErr(null); setSearchError(null)
         const q = query.trim()
-        if (!q) {
-            setResults([])
-            return
-        }
-
+        if (!q) { setResults([]); return }
         setSearchLoading(true)
         try {
-            const res = await searchUsers(q)
-            setResults(res)
+            setResults(await searchUsers(q))
         } catch {
             setSearchError('User search failed.')
         } finally {
@@ -43,192 +35,161 @@ export default function SplitPayPanel() {
     }
 
     function addParticipant(u: UserSearchItem) {
-        if (participants.some((p) => p.userId === u.userId)) return
+        if (participants.some((p) => p.id === u.id)) return
         setParticipants((prev) => [...prev, u])
     }
 
-    function removeParticipant(userId: number) {
-        setParticipants((prev) => prev.filter((p) => p.userId !== userId))
+    function removeParticipant(id: number) {
+        setParticipants((prev) => prev.filter((p) => p.id !== id))
     }
 
     async function onSubmit() {
-        setMsg(null)
-        setErr(null)
-
-        if (!totalAmount || totalAmount <= 0) {
-            setErr('Total amount must be greater than 0.')
-            return
-        }
-        if (participants.length === 0) {
-            setErr('Please add at least 1 participant.')
-            return
-        }
+        setMsg(null); setErr(null)
+        if (!totalAmount || totalAmount <= 0) { setErr('Total amount must be greater than 0.'); return }
+        if (participants.length === 0) { setErr('Please add at least 1 participant.'); return }
 
         const payload: SplitPaymentRequest = {
             totalAmount,
             reference: reference.trim(),
-            participantUserIds: participants.map((p) => p.userId)
+            participantUserIds: participants.map((p) => p.id)
         }
 
         setSubmitting(true)
         try {
             const res = await splitPayment(payload)
-            if (!res.success) {
-                setErr(res.message || 'Split payment failed.')
-                return
-            }
-            setErr(null)
-            setMsg(`Split created${res.splitId ? ` (ID: ${res.splitId})` : ''}.`)
-            // update backend to send DTO, not participants and user details eventually:
+            setMsg(res.message || 'Split created.')
             setParticipants([])
             setReference('')
-        } catch {
-            setErr('Split payment failed.')
+        } catch (e) {
+            setErr(e instanceof Error ? e.message : 'Split payment failed.')
         } finally {
             setSubmitting(false)
         }
     }
 
     return (
-        <div style={{ display: 'grid', gap: '16px' }}>
+        <div className="grid gap-5">
             <div>
-                <h2 style={{ marginTop: 0 }}>Split Pay</h2>
-                <div style={{ color: '#555' }}>Create a split between selected participants.</div>
+                <h2 className="text-xl font-bold text-foreground mb-1">Split Pay</h2>
+                <p className="text-sm text-muted-foreground">Create a split between selected participants.</p>
             </div>
 
             {(msg || err) && (
-                <div style={{ padding: '10px', border: `1px solid ${err ? '#f2caca' : '#cdeccd'}` }}>
+                <div className={`rounded-lg border px-4 py-3 text-sm ${
+                    err
+                        ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                        : 'border-[#00D4B8]/30 bg-[#00D4B8]/10 text-[#00D4B8]'
+                }`}>
                     {err ?? msg}
                 </div>
             )}
 
-            {/* Form */}
-            <section style={{ border: '1px solid #eee', borderRadius: '12px', padding: '12px' }}>
-                <h3 style={{ marginTop: 0 }}>Split details</h3>
+            {/* Split details */}
+            <section className="border border-border rounded-xl p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-4">Split details</h3>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px' }}>
-                    <label style={{ display: 'grid', gap: '6px' }}>
-                        Total Amount
-                        <input
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label className="text-foreground">Total Amount (ZAR)</Label>
+                        <Input
                             type="number"
                             min={1}
                             value={totalAmount}
                             onChange={(e) => setTotalAmount(Number(e.target.value))}
-                            style={{ padding: '10px' }}
+                            className="bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
                         />
-                    </label>
-
-                    <label style={{ display: 'grid', gap: '6px' }}>
-                        Reference (optional)
-                        <input
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-foreground">
+                            Reference <span className="text-muted-foreground font-normal">(optional)</span>
+                        </Label>
+                        <Input
                             value={reference}
                             onChange={(e) => setReference(e.target.value)}
-                            placeholder="e.g. Dinner"
-                            style={{ padding: '10px' }}
+                            placeholder="e.g. Dinner at Tashas"
+                            className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                         />
-                    </label>
+                    </div>
                 </div>
 
-                <div style={{ marginTop: '12px' }}>
-                    <div style={{ fontWeight: 600, marginBottom: '8px' }}>Participants</div>
+                <div className="mt-4">
+                    <div className="text-sm font-semibold text-foreground mb-2">Participants</div>
                     {participants.length === 0 ? (
-                        <div style={{ color: '#777' }}>No participants added yet.</div>
+                        <div className="text-sm text-muted-foreground">No participants added yet.</div>
                     ) : (
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <div className="flex gap-2 flex-wrap">
                             {participants.map((p) => (
-                                <span
-                                    key={p.userId}
-                                    style={{
-                                        border: '1px solid #eee',
-                                        borderRadius: '999px',
-                                        padding: '8px 10px',
-                                        display: 'flex',
-                                        gap: '8px',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                  {p.firstName} {p.lastName} <span style={{ color: '#777' }}>@{p.username}</span>
-                  <button
-                      onClick={() => removeParticipant(p.userId)}
-                      style={{ cursor: 'pointer' }}
-                  >
-                    ×
-                  </button>
-                </span>
+                                <span key={p.id} className="flex items-center gap-2 border border-border rounded-full px-3 py-1.5 text-sm bg-secondary text-foreground">
+                                    {p.firstName} {p.lastName}
+                                    <span className="text-muted-foreground">@{p.username}</span>
+                                    <button
+                                        onClick={() => removeParticipant(p.id)}
+                                        className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer ml-1"
+                                    >
+                                        ×
+                                    </button>
+                                </span>
                             ))}
                         </div>
                     )}
                 </div>
 
-                <div style={{ marginTop: '14px' }}>
-                    <button
-                        onClick={onSubmit}
-                        disabled={submitting}
-                        style={{ padding: '10px 14px', cursor: 'pointer' }}
-                    >
-                        {submitting ? 'Creating…' : 'Create Split'}
-                    </button>
-                </div>
+                <Button
+                    onClick={onSubmit}
+                    disabled={submitting}
+                    className="mt-4 bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold cursor-pointer"
+                >
+                    {submitting ? 'Creating…' : 'Create Split'}
+                </Button>
             </section>
 
-            {/* Search */}
-            <section style={{ border: '1px solid #eee', borderRadius: '12px', padding: '12px' }}>
-                <h3 style={{ marginTop: 0 }}>Find users to add</h3>
+            {/* User search */}
+            <section className="border border-border rounded-xl p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-3">Find users to add</h3>
 
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <input
+                <div className="flex gap-3">
+                    <Input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Search by name or username"
-                        style={{ padding: '10px', flex: 1 }}
+                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
-                    <button
+                    <Button
                         onClick={onSearch}
                         disabled={searchLoading}
-                        style={{ padding: '10px 14px', cursor: 'pointer' }}
+                        className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold shrink-0 cursor-pointer"
                     >
                         {searchLoading ? 'Searching…' : 'Search'}
-                    </button>
+                    </Button>
                 </div>
 
                 {searchError && (
-                    <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #f2caca' }}>
+                    <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                         {searchError}
                     </div>
                 )}
 
-                <div style={{ marginTop: '12px', display: 'grid', gap: '10px' }}>
+                <div className="mt-3 grid gap-2">
                     {results.map((u) => (
-                        <div
-                            key={u.userId}
-                            style={{
-                                border: '1px solid #f2f2f2',
-                                borderRadius: '10px',
-                                padding: '10px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                gap: '12px'
-                            }}
-                        >
+                        <div key={u.id} className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
                             <div>
-                                <div style={{ fontWeight: 600 }}>
-                                    {u.firstName} {u.lastName} <span style={{ color: '#777' }}>@{u.username}</span>
+                                <div className="font-semibold text-foreground text-sm">
+                                    {u.firstName} {u.lastName}{' '}
+                                    <span className="text-muted-foreground font-normal">@{u.username}</span>
                                 </div>
-                                <div style={{ color: '#777' }}>User ID: {u.userId}</div>
                             </div>
-
-                            <button
+                            <Button
+                                size="sm"
                                 onClick={() => addParticipant(u)}
-                                style={{ padding: '10px 14px', cursor: 'pointer' }}
+                                variant="outline"
+                                className="border-[#00D4B8]/40 text-[#00D4B8] hover:bg-[#00D4B8]/10 shrink-0 cursor-pointer"
                             >
                                 Add
-                            </button>
+                            </Button>
                         </div>
                     ))}
-
                     {!searchLoading && query.trim() && results.length === 0 && (
-                        <div style={{ color: '#777' }}>No users found.</div>
+                        <div className="text-sm text-muted-foreground">No users found.</div>
                     )}
                 </div>
             </section>

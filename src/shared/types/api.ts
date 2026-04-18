@@ -1,37 +1,76 @@
-// Shared DTOs/contracts used by the UI (mirrors backend payloads)
+// Shared DTOs — mirrors the backend API contract
 
-export type AuthResponse = {
-    token: string
+// ─── Envelope ────────────────────────────────────────────────────────
+export type ApiEnvelope<T> = {
+    success: boolean
+    message: string | null
+    data: T | null
+}
+
+// ─── Common ──────────────────────────────────────────────────────────
+export type SimpleUser = {
+    id: number
     firstName: string
     email: string
 }
 
-export type WalletResponse = {
-    id: number
-    balance: number
-}
-
-export type TopUpInitiateResponse = {
-    redirectUrl: string
-}
-
-// Users
-export type UserSearchItem = {
+// ─── Auth ─────────────────────────────────────────────────────────────
+export type AuthResponse = {
+    token: string
     userId: number
+    username: string
+    email: string
+}
+
+// ─── Users ────────────────────────────────────────────────────────────
+export type UserSearchItem = {
+    id: number
     username: string
     firstName: string
     lastName: string
 }
 
 export type MyProfileResponse = {
-    userId: number
+    id: number
     username: string
     firstName: string
     lastName: string
-    email: string
 }
 
-// Split payment
+export type QrDataResponse = {
+    userId: number
+    displayName: string
+    payload: string
+}
+
+// ─── Wallet ───────────────────────────────────────────────────────────
+export type WalletResponse = {
+    id: number
+    balance: number
+    user: SimpleUser
+}
+
+export type TopUpInitiateResponse = {
+    intentId: number
+    redirectUrl: string
+    fields: Record<string, unknown>
+}
+
+// ─── Payments ─────────────────────────────────────────────────────────
+export type SendPaymentRequest = {
+    toUserId: number
+    amount: number
+    note?: string
+}
+
+export type SendPaymentResponse = {
+    transactionId: number
+    to: SimpleUser
+    amount: number
+    note: string | null
+    timestamp: string
+}
+
 export type SplitPaymentRequest = {
     totalAmount: number
     reference: string
@@ -39,12 +78,51 @@ export type SplitPaymentRequest = {
 }
 
 export type SplitPaymentResponse = {
-    success: boolean
-    splitId?: number
-    message?: string
+    message: string
+    reference: string
+    totalAmount: number
+    totalCount: number
+    participantUserIds: number[]
 }
 
-// Debts
+export type MoneyRequestRequest = {
+    toUserId: number
+    amount: number
+    note?: string
+}
+
+export type MoneyRequestResponse = {
+    requestId: number
+    from: SimpleUser
+    to: SimpleUser
+    amount: number
+    note: string | null
+    status: string
+    createdAt: string
+}
+
+export type QrLinkRequest = {
+    amount?: number
+    note?: string
+}
+
+export type QrLinkResponse = {
+    token: string
+    qrPayload: string
+    amount: number
+    note: string | null
+    expiresAt: string
+}
+
+export type QrLinkResolveResponse = {
+    to: SimpleUser
+    amount: number
+    note: string | null
+    expiresAt: string
+    expired: boolean
+}
+
+// ─── Debts ────────────────────────────────────────────────────────────
 export type DebtItem = {
     debtId: number
     amount: number
@@ -58,21 +136,24 @@ export type SettleDebtRequest = {
     debtId: number
 }
 
-export type BasicActionResponse = {
-    success: boolean
-    message?: string
+// ─── Friends ──────────────────────────────────────────────────────────
+export type FriendItem = {
+    id: number
+    username: string
+    firstName: string
+    lastName: string
 }
 
-// Friends
 export type FriendRequestCreateRequest = {
     receiverId: number
 }
 
 export type FriendRequestItem = {
-    requestId: number
+    id: number
     senderId: number
+    senderUsername: string
     senderFirstName: string
-    senderEmail: string
+    status: string
     createdAt: string
 }
 
@@ -81,12 +162,16 @@ export type FriendRequestRespondRequest = {
     action: 'ACCEPTED' | 'REJECTED'
 }
 
-// History
-export type TransactionHistoryItem = {
+// ─── History ──────────────────────────────────────────────────────────
+export type TransactionDto = {
     id: number
+    fromUser: SimpleUser | null
+    toUser: SimpleUser | null
     amount: number
-    reference: string
-    direction: 'INWARD' | 'OUTWARD'
-    type: string
+    type: 'SEND' | 'SPLIT' | 'TOP_UP' | 'SETTLE' | 'WITHDRAW'
+    note: string | null
+    reference: string | null
+    splitGroupId: string | null
     timestamp: string
+    direction: 'SENT' | 'RECEIVED' | null
 }

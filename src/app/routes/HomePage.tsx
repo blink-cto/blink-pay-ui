@@ -5,6 +5,7 @@ import { Zap, Users, ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GradientText } from '@/components/GradientText'
 import { FeatureCard } from '@/components/FeatureCard'
+import { getStoredUser } from '@/features/auth/sessionState.ts'
 
 const fadeUp: Variants = {
     hidden: { opacity: 0, y: 24 },
@@ -38,6 +39,7 @@ const features = [
 
 export default function HomePage() {
     const navigate = useNavigate()
+    const user = getStoredUser()
 
     return (
         <div className="flex flex-col">
@@ -91,21 +93,33 @@ export default function HomePage() {
                         variants={fadeUp}
                         className="flex flex-col sm:flex-row items-center justify-center gap-4"
                     >
-                        <Button
-                            size="lg"
-                            onClick={() => navigate('/signup')}
-                            className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold px-8 h-12 text-base shadow-lg shadow-[#00D4B8]/20 cursor-pointer"
-                        >
-                            Get Started — It's Free
-                        </Button>
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            onClick={() => navigate('/about')}
-                            className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary h-12 px-8 text-base cursor-pointer"
-                        >
-                            Learn More
-                        </Button>
+                        {user ? (
+                            <Button
+                                size="lg"
+                                onClick={() => navigate('/dashboard')}
+                                className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold px-8 h-12 text-base shadow-lg shadow-[#00D4B8]/20 cursor-pointer"
+                            >
+                                Go to Dashboard
+                            </Button>
+                        ) : (
+                            <>
+                                <Button
+                                    size="lg"
+                                    onClick={() => navigate('/signup')}
+                                    className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold px-8 h-12 text-base shadow-lg shadow-[#00D4B8]/20 cursor-pointer"
+                                >
+                                    Get Started — It's Free
+                                </Button>
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    onClick={() => navigate('/about')}
+                                    className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary h-12 px-8 text-base cursor-pointer"
+                                >
+                                    Learn More
+                                </Button>
+                            </>
+                        )}
                     </motion.div>
                 </div>
             </section>
@@ -158,14 +172,16 @@ export default function HomePage() {
                             Ready to <GradientText>blink?</GradientText>
                         </h2>
                         <p className="text-muted-foreground mb-8">
-                            Join early access and start sending money the smart way.
+                            {user
+                                ? `Welcome back, ${user.username}. Your dashboard is ready.`
+                                : 'Join early access and start sending money the smart way.'}
                         </p>
                         <Button
                             size="lg"
-                            onClick={() => navigate('/signup')}
+                            onClick={() => navigate(user ? '/dashboard' : '/signup')}
                             className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold px-10 h-12 text-base shadow-lg shadow-[#00D4B8]/20 cursor-pointer"
                         >
-                            Create Your Free Account
+                            {user ? 'Open Dashboard' : 'Create Your Free Account'}
                         </Button>
                     </motion.div>
                 </div>

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useNavigate, NavLink } from 'react-router-dom'
+import { useNavigate, NavLink, Navigate } from 'react-router-dom'
 import type { LoginRequest } from '@/features/auth/api.ts'
 import { login } from '@/features/auth/api.ts'
 import { startSession } from '@/features/auth/session.ts'
+import { getStoredUser } from '@/features/auth/sessionState.ts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +11,8 @@ import { GradientText } from '@/components/GradientText'
 
 export default function LoginPage() {
     const navigate = useNavigate()
+
+    if (getStoredUser()) return <Navigate to="/dashboard" replace />
 
     const [form, setForm] = useState<LoginRequest>({ email: '', password: '' })
     const [error, setError] = useState<string | null>(null)
@@ -25,7 +28,7 @@ export default function LoginPage() {
             startSession(res)
             navigate('/dashboard')
         } catch {
-            setError('Login failed. Please check your email and password.')
+            setError('Login failed. Please check your username and password.')
         } finally {
             setIsSubmitting(false)
         }

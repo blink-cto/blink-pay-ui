@@ -1,4 +1,7 @@
 import { http } from '../../shared/api/http'
+import type { AuthResponse } from '../../shared/types/api'
+
+export type { AuthResponse }
 
 export type LoginRequest = {
     email: string
@@ -6,17 +9,11 @@ export type LoginRequest = {
 }
 
 export type RegisterRequest = {
-    firstName: string
-    lastName: string
+    username: string
     email: string
     password: string
-    username: string
-}
-
-export type AuthResponse = {
-    token: string
     firstName: string
-    email: string
+    lastName: string
 }
 
 const LOGIN_PATH = '/api/auth/login'

@@ -1,4 +1,4 @@
-type StoredUser = { firstName: string; email: string }
+type StoredUser = { username: string; email: string }
 
 const USER_KEY = 'blinkpay_user'
 

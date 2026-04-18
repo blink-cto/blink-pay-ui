@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { getMyWallet, initiateTopUp } from '../../../shared/api/wallet'
 import type { WalletResponse } from '../../../shared/types/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function WalletPanel() {
     const [wallet, setWallet] = useState<WalletResponse | null>(null)
@@ -24,16 +27,13 @@ export default function WalletPanel() {
         }
     }
 
-    useEffect(() => {
-        void load()
-    }, [])
+    useEffect(() => { void load() }, [])
 
     async function onTopUp() {
         setTopUpError(null)
         setTopUpLoading(true)
         try {
-            const res = await initiateTopUp(topUpAmount)
-            // PayFast flow: redirect browser
+            const res = await initiateTopUp(topUpAmount.toFixed(2))
             window.location.href = res.redirectUrl
         } catch {
             setTopUpError('Failed to initiate top-up.')
@@ -42,49 +42,55 @@ export default function WalletPanel() {
         }
     }
 
-    if (loading) return <div>Loading wallet...</div>
-    if (error) return <div>{error}</div>
+    if (loading) return <div className="text-muted-foreground">Loading wallet...</div>
+    if (error) return <div className="text-destructive">{error}</div>
 
     return (
-        <div style={{ display: 'grid', gap: '16px' }}>
+        <div className="grid gap-6">
+            {/* Balance */}
             <div>
-                <h2 style={{ marginTop: 0 }}>Wallet</h2>
-                <div style={{ color: '#555' }}>Current balance</div>
-                <div style={{ fontSize: '32px', fontWeight: 700 }}>
+                <h2 className="text-xl font-bold text-foreground mb-1">Wallet</h2>
+                <div className="text-sm text-muted-foreground mb-1">Current balance</div>
+                <div className="text-4xl font-bold text-[#00D4B8]">
                     R {wallet?.balance ?? 0}
                 </div>
             </div>
 
-            <div style={{ borderTop: '1px solid #eee', paddingTop: '16px' }}>
-                <h3 style={{ margin: 0 }}>Top Up</h3>
+            {/* Top Up */}
+            <div className="border-t border-border pt-5">
+                <h3 className="text-base font-semibold text-foreground mb-4">Top Up</h3>
 
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '12px' }}>
-                    <input
-                        type="number"
-                        min={1}
-                        value={topUpAmount}
-                        onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                        style={{ padding: '10px', width: '140px' }}
-                    />
+                <div className="flex gap-3 items-end">
+                    <div className="space-y-2">
+                        <Label className="text-foreground">Amount (ZAR)</Label>
+                        <Input
+                            type="number"
+                            min={1}
+                            value={topUpAmount}
+                            onChange={(e) => setTopUpAmount(Number(e.target.value))}
+                            className="w-36 bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
+                        />
+                    </div>
 
-                    <button
+                    <Button
                         onClick={onTopUp}
                         disabled={topUpLoading}
-                        style={{ padding: '10px 14px', cursor: 'pointer' }}
+                        className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold cursor-pointer"
                     >
                         {topUpLoading ? 'Redirecting...' : 'Top Up via PayFast'}
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                        variant="outline"
                         onClick={load}
-                        style={{ padding: '10px 14px', cursor: 'pointer' }}
+                        className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
                     >
                         Refresh
-                    </button>
+                    </Button>
                 </div>
 
                 {topUpError && (
-                    <div style={{ marginTop: '12px', padding: '10px', border: '1px solid #f2caca' }}>
+                    <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                         {topUpError}
                     </div>
                 )}

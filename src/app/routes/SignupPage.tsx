@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useNavigate, NavLink } from 'react-router-dom'
+import { useNavigate, NavLink, Navigate } from 'react-router-dom'
 import type { RegisterRequest } from '@/features/auth/api.ts'
 import { register } from '@/features/auth/api.ts'
 import { startSession } from '@/features/auth/session.ts'
+import { getStoredUser } from '@/features/auth/sessionState.ts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +13,8 @@ type SignupForm = RegisterRequest & { confirmPassword: string }
 
 export default function SignupPage() {
     const navigate = useNavigate()
+
+    if (getStoredUser()) return <Navigate to="/dashboard" replace />
 
     const [form, setForm] = useState<SignupForm>({
         firstName: '',
