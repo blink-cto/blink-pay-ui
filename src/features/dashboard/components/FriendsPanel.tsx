@@ -189,10 +189,10 @@ export default function FriendsPanel() {
                 ) : (
                     <div className="grid gap-2">
                         {incoming.map((r) => (
-                            <div key={r.id} className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
+                            <div key={r.requestId} className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
                                 <div>
                                     <div className="font-semibold text-foreground text-sm">
-                                        {r.senderFirstName}{' '}
+                                        {r.senderFirstName} {r.senderLastName}{' '}
                                         <span className="text-muted-foreground font-normal">@{r.senderUsername}</span>
                                     </div>
                                     <div className="text-xs text-muted-foreground">
@@ -202,20 +202,20 @@ export default function FriendsPanel() {
                                 <div className="flex gap-2 shrink-0">
                                     <Button
                                         size="sm"
-                                        onClick={() => onRespond(r.id, 'ACCEPTED')}
-                                        disabled={busyId === r.id}
+                                        onClick={() => onRespond(r.requestId, 'ACCEPTED')}
+                                        disabled={busyId === r.requestId}
                                         className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold cursor-pointer"
                                     >
-                                        {busyId === r.id ? '…' : 'Accept'}
+                                        {busyId === r.requestId ? '…' : 'Accept'}
                                     </Button>
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => onRespond(r.id, 'REJECTED')}
-                                        disabled={busyId === r.id}
+                                        onClick={() => onRespond(r.requestId, 'REJECTED')}
+                                        disabled={busyId === r.requestId}
                                         className="border-destructive/40 text-destructive hover:bg-destructive/10 cursor-pointer"
                                     >
-                                        {busyId === r.id ? '…' : 'Reject'}
+                                        {busyId === r.requestId ? '…' : 'Reject'}
                                     </Button>
                                 </div>
                             </div>

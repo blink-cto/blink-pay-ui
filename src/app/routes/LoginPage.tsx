@@ -11,12 +11,13 @@ import { GradientText } from '@/components/GradientText'
 
 export default function LoginPage() {
     const navigate = useNavigate()
+    const alreadyAuthed = !!getStoredUser()
 
-    if (getStoredUser()) return <Navigate to="/dashboard" replace />
-
-    const [form, setForm] = useState<LoginRequest>({ email: '', password: '' })
+    const [form, setForm] = useState<LoginRequest>({ username: '', password: '' })
     const [error, setError] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    if (alreadyAuthed) return <Navigate to="/dashboard" replace />
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -45,15 +46,14 @@ export default function LoginPage() {
 
             <form onSubmit={onSubmit} className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground">Email</Label>
+                    <Label htmlFor="username" className="text-foreground">Username</Label>
                     <Input
-                        id="email"
-                        value={form.email}
-                        onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        type="email"
-                        autoComplete="email"
+                        id="username"
+                        value={form.username}
+                        onChange={(e) => setForm({ ...form, username: e.target.value })}
+                        autoComplete="username"
                         required
-                        placeholder="you@example.com"
+                        placeholder="alice123"
                         className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
                 </div>

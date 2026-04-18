@@ -8,10 +8,36 @@ export type ApiEnvelope<T> = {
 }
 
 // ─── Common ──────────────────────────────────────────────────────────
+export type UserRole = 'PERSONAL' | 'BUSINESS'
+
+// Minimal user shape returned inline on payments, history, wallet, and QR resolve
 export type SimpleUser = {
     id: number
     firstName: string
     email: string
+}
+
+// Full profile returned by /users/me, /users/search, and friend endpoints
+export type UserProfile = {
+    id: number          // normalised from userId on the backend
+    username: string
+    firstName: string
+    lastName: string
+    role: UserRole
+    phoneNumber: string | null
+    profilePictureUrl: string | null
+    businessName: string | null
+    businessCategory: string | null
+}
+
+// Both aliases point to the same shape after normalisation
+export type UserSearchItem = UserProfile
+export type MyProfileResponse = UserProfile
+
+export type QrDataResponse = {
+    userId: number
+    displayName: string
+    payload: string
 }
 
 // ─── Auth ─────────────────────────────────────────────────────────────
@@ -20,27 +46,6 @@ export type AuthResponse = {
     userId: number
     username: string
     email: string
-}
-
-// ─── Users ────────────────────────────────────────────────────────────
-export type UserSearchItem = {
-    id: number
-    username: string
-    firstName: string
-    lastName: string
-}
-
-export type MyProfileResponse = {
-    id: number
-    username: string
-    firstName: string
-    lastName: string
-}
-
-export type QrDataResponse = {
-    userId: number
-    displayName: string
-    payload: string
 }
 
 // ─── Wallet ───────────────────────────────────────────────────────────
@@ -149,10 +154,11 @@ export type FriendRequestCreateRequest = {
 }
 
 export type FriendRequestItem = {
-    id: number
+    requestId: number
     senderId: number
     senderUsername: string
     senderFirstName: string
+    senderLastName: string
     status: string
     createdAt: string
 }

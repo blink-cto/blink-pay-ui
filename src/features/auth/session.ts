@@ -5,7 +5,11 @@ const USER_KEY = 'blinkpay_user'
 
 export function startSession(auth: AuthResponse): void {
     setToken(auth.token)
-    localStorage.setItem(USER_KEY, JSON.stringify({ username: auth.username ?? auth.email, email: auth.email }))
+    localStorage.setItem(USER_KEY, JSON.stringify({
+        username: auth.username ?? auth.email,
+        email: auth.email,
+        firstName: auth.username ?? auth.email,
+    }))
     window.dispatchEvent(new Event('auth:changed'))
 }
 

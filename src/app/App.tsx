@@ -8,6 +8,7 @@ import ContactPage from './routes/ContactPage'
 import LoginPage from './routes/LoginPage'
 import SignupPage from './routes/SignupPage.tsx'
 import DashboardPage from './routes/DashboardPage'
+import PayPage from './routes/PayPage'
 
 export default function App() {
     return (
@@ -47,6 +48,16 @@ export default function App() {
                         <DashboardPage />
                     </AppLayout>
                 }
+                />
+
+                {/* QR payment confirmation */}
+                <Route
+                    path="/pay"
+                    element={
+                        <AppLayout>
+                            <PayPage />
+                        </AppLayout>
+                    }
                 />
 
                 {/* Auth pages */}

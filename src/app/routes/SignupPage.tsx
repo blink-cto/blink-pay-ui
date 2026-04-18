@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, NavLink, Navigate } from 'react-router-dom'
 import type { RegisterRequest } from '@/features/auth/api.ts'
+import { cn } from '@/lib/utils'
 import { register } from '@/features/auth/api.ts'
 import { startSession } from '@/features/auth/session.ts'
 import { getStoredUser } from '@/features/auth/sessionState.ts'
@@ -13,16 +14,18 @@ type SignupForm = RegisterRequest & { confirmPassword: string }
 
 export default function SignupPage() {
     const navigate = useNavigate()
+    const alreadyAuthed = !!getStoredUser()
 
-    if (getStoredUser()) return <Navigate to="/dashboard" replace />
-
+    const [role, setRole] = useState<'PERSONAL' | 'BUSINESS'>('PERSONAL')
     const [form, setForm] = useState<SignupForm>({
         firstName: '',
         lastName: '',
         username: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        businessName: '',
+        businessCategory: '',
     })
 
     const [error, setError] = useState<string | null>(null)
@@ -49,7 +52,12 @@ export default function SignupPage() {
                 lastName: form.lastName,
                 username: form.username,
                 email: form.email,
-                password: form.password
+                password: form.password,
+                role,
+                ...(role === 'BUSINESS' && {
+                    businessName: form.businessName,
+                    businessCategory: form.businessCategory,
+                }),
             }
 
             const res = await register(payload)
@@ -62,6 +70,8 @@ export default function SignupPage() {
         }
     }
 
+    if (alreadyAuthed) return <Navigate to="/dashboard" replace />
+
     return (
         <div className="space-y-6">
             <div className="text-center space-y-1">
@@ -72,6 +82,25 @@ export default function SignupPage() {
             </div>
 
             <form onSubmit={onSubmit} className="space-y-4">
+                {/* Account type toggle */}
+                <div className="flex gap-1 p-1 rounded-full bg-secondary/60">
+                    {(['PERSONAL', 'BUSINESS'] as const).map((r) => (
+                        <button
+                            key={r}
+                            type="button"
+                            onClick={() => setRole(r)}
+                            className={cn(
+                                'flex-1 py-1.5 rounded-full text-sm font-semibold transition-all duration-150 cursor-pointer border-0',
+                                r === role
+                                    ? 'bg-[#00D4B8] text-[#09090B] shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            )}
+                        >
+                            {r === 'PERSONAL' ? 'Personal' : 'Business'}
+                        </button>
+                    ))}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="firstName" className="text-foreground">First Name</Label>
@@ -108,6 +137,32 @@ export default function SignupPage() {
                         className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
                 </div>
+
+                {role === 'BUSINESS' && (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="businessName" className="text-foreground">Business Name</Label>
+                            <Input
+                                id="businessName"
+                                value={form.businessName ?? ''}
+                                onChange={(e) => set('businessName', e.target.value)}
+                                required={role === 'BUSINESS'}
+                                placeholder="Acme Corp"
+                                className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="businessCategory" className="text-foreground">Category</Label>
+                            <Input
+                                id="businessCategory"
+                                value={form.businessCategory ?? ''}
+                                onChange={(e) => set('businessCategory', e.target.value)}
+                                placeholder="e.g. Retail"
+                                className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
+                            />
+                        </div>
+                    </div>
+                )}
 
                 <div className="space-y-2">
                     <Label htmlFor="email" className="text-foreground">Email</Label>
