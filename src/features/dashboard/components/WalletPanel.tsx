@@ -94,7 +94,7 @@ export default function WalletPanel() {
             <div className="border-t border-border pt-5">
                 <h3 className="text-base font-semibold text-foreground mb-4">Top Up</h3>
 
-                <div className="flex gap-3 items-end">
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
                     <div className="space-y-2">
                         <Label className="text-foreground">Amount (ZAR)</Label>
                         <Input
@@ -102,7 +102,7 @@ export default function WalletPanel() {
                             min={1}
                             value={topUpAmount}
                             onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                            className="w-36 bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
+                            className="w-full sm:w-36 bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
                         />
                     </div>
 
@@ -135,7 +135,7 @@ export default function WalletPanel() {
                 <h3 className="text-base font-semibold text-foreground mb-1">Cashout</h3>
                 <p className="text-xs text-muted-foreground mb-4">Withdraw funds to your bank account (1–2 business days).</p>
 
-                <div className="flex gap-3 items-end">
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
                     <div className="space-y-2">
                         <Label className="text-foreground">Amount (ZAR)</Label>
                         <Input
@@ -143,7 +143,7 @@ export default function WalletPanel() {
                             min={1}
                             value={cashOutAmount}
                             onChange={(e) => setCashOutAmount(Number(e.target.value))}
-                            className="w-36 bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
+                            className="w-full sm:w-36 bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
                         />
                     </div>
                     <Button
@@ -176,7 +176,7 @@ export default function WalletPanel() {
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">Instantly add funds without PayFast.</p>
 
-                <div className="flex gap-3 items-end">
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
                     <div className="space-y-2">
                         <Label className="text-foreground">Amount (ZAR)</Label>
                         <Input
@@ -184,7 +184,7 @@ export default function WalletPanel() {
                             min={1}
                             value={directAmount}
                             onChange={(e) => setDirectAmount(Number(e.target.value))}
-                            className="w-36 bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
+                            className="w-full sm:w-36 bg-secondary border-input text-foreground focus-visible:ring-[#00D4B8]"
                         />
                     </div>
                     <Button

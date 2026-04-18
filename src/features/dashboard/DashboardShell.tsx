@@ -34,24 +34,26 @@ export default function DashboardShell() {
     }
 
     return (
-        <div className="flex flex-col gap-5" style={{ height: 'calc(100vh - 112px)' }}>
-            {/* Tab bar */}
-            <div className="flex justify-center">
-                <div className="flex gap-1 p-1.5 rounded-full bg-card/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_16px_rgba(0,0,0,0.4)]">
-                    {DASHBOARD_TABS.map((t) => (
-                        <button
-                            key={t.key}
-                            onClick={() => handleTabChange(t.key)}
-                            className={cn(
-                                'relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer border-0',
-                                t.key === active
-                                    ? 'bg-[#00D4B8] text-[#09090B] shadow-md shadow-[#00D4B8]/25'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                            )}
-                        >
-                            {t.label}
-                        </button>
-                    ))}
+        <div className="flex flex-col gap-5" style={{ height: 'calc(100dvh - 112px)' }}>
+            {/* Tab bar — scrollable on mobile */}
+            <div className="overflow-x-auto scrollbar-none">
+                <div className="flex justify-start md:justify-center min-w-max mx-auto">
+                    <div className="flex gap-1 p-1.5 rounded-full bg-card/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_16px_rgba(0,0,0,0.4)]">
+                        {DASHBOARD_TABS.map((t) => (
+                            <button
+                                key={t.key}
+                                onClick={() => handleTabChange(t.key)}
+                                className={cn(
+                                    'relative px-3 sm:px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer border-0 whitespace-nowrap',
+                                    t.key === active
+                                        ? 'bg-[#00D4B8] text-[#09090B] shadow-md shadow-[#00D4B8]/25'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                                )}
+                            >
+                                {t.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 

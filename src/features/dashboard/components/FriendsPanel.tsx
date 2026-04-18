@@ -199,7 +199,7 @@ export default function FriendsPanel() {
                                         {new Date(r.createdAt).toLocaleString()}
                                     </div>
                                 </div>
-                                <div className="flex gap-2 shrink-0">
+                                <div className="flex flex-col xs:flex-row gap-2 shrink-0">
                                     <Button
                                         size="sm"
                                         onClick={() => onRespond(r.requestId, 'ACCEPTED')}

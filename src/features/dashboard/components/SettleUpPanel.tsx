@@ -75,8 +75,8 @@ export default function SettleUpPanel() {
             ) : (
                 <div className="grid gap-3">
                     {debts.map((d) => (
-                        <div key={d.debtId} className="border border-border rounded-xl p-4 flex justify-between items-center gap-4 bg-secondary/30">
-                            <div className="grid gap-1">
+                        <div key={d.debtId} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-secondary/30">
+                            <div className="grid gap-1 min-w-0">
                                 <div className="font-semibold text-foreground">
                                     Owe {d.toUserFirstName}
                                     <span className="text-muted-foreground font-normal ml-1">({d.toUserEmail})</span>
@@ -86,7 +86,7 @@ export default function SettleUpPanel() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4 shrink-0">
+                            <div className="flex items-center gap-3 shrink-0">
                                 <div className="font-bold text-lg text-[#FF2D78]">R {d.amount}</div>
                                 <Button
                                     size="sm"

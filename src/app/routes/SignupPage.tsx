@@ -101,7 +101,7 @@ export default function SignupPage() {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="firstName" className="text-foreground">First Name</Label>
                         <Input
@@ -139,7 +139,7 @@ export default function SignupPage() {
                 </div>
 
                 {role === 'BUSINESS' && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="businessName" className="text-foreground">Business Name</Label>
                             <Input

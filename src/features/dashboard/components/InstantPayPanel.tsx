@@ -226,7 +226,7 @@ export default function InstantPayPanel() {
                     <section className="border border-border rounded-xl p-4">
                         <h3 className="text-sm font-semibold text-foreground mb-4">Payment details</h3>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-foreground">Amount (ZAR)</Label>
                                 <Input
