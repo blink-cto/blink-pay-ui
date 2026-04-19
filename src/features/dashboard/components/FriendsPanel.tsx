@@ -1,15 +1,23 @@
 import { useEffect, useState } from 'react'
 import { searchUsers } from '../../../shared/api/users'
 import {
+    getFriends,
     getIncomingFriendRequests,
     respondToFriendRequest,
+    removeFriend,
     sendFriendRequest
 } from '../../../shared/api/friends'
-import type { FriendRequestItem, UserSearchItem } from '../../../shared/types/api'
+import type { FriendItem, FriendRequestItem, UserSearchItem } from '../../../shared/types/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 export default function FriendsPanel() {
+    // Friends list
+    const [friends, setFriends] = useState<FriendItem[]>([])
+    const [friendsLoading, setFriendsLoading] = useState(true)
+    const [friendsError, setFriendsError] = useState<string | null>(null)
+    const [removingId, setRemovingId] = useState<number | null>(null)
+
     // Search
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<UserSearchItem[]>([])
@@ -26,6 +34,33 @@ export default function FriendsPanel() {
     const [actionMsg, setActionMsg] = useState<string | null>(null)
     const [actionErr, setActionErr] = useState<string | null>(null)
     const [busyId, setBusyId] = useState<number | null>(null)
+
+    async function loadFriends() {
+        setFriendsError(null)
+        setFriendsLoading(true)
+        try {
+            setFriends(await getFriends())
+        } catch {
+            setFriendsError('Failed to load friends.')
+        } finally {
+            setFriendsLoading(false)
+        }
+    }
+
+    useEffect(() => { void loadFriends() }, [])
+
+    async function onRemoveFriend(friendId: number) {
+        setActionMsg(null); setActionErr(null); setRemovingId(friendId)
+        try {
+            await removeFriend(friendId)
+            setActionMsg('Friend removed.')
+            await loadFriends()
+        } catch {
+            setActionErr('Failed to remove friend.')
+        } finally {
+            setRemovingId(null)
+        }
+    }
 
     useEffect(() => {
         const q = query.trim()
@@ -114,6 +149,49 @@ export default function FriendsPanel() {
                     {actionErr ?? actionMsg}
                 </div>
             )}
+
+            {/* Friends list */}
+            <section className="border border-border rounded-xl p-4">
+                <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-sm font-semibold text-foreground">My friends</h3>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={loadFriends}
+                        className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                        Refresh
+                    </Button>
+                </div>
+
+                {friendsLoading ? (
+                    <div className="text-sm text-muted-foreground">Loading...</div>
+                ) : friendsError ? (
+                    <div className="text-sm text-destructive">{friendsError}</div>
+                ) : friends.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No friends yet.</div>
+                ) : (
+                    <div className="grid gap-2">
+                        {friends.map((f) => (
+                            <div key={f.id} className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
+                                <div className="font-semibold text-foreground text-sm">
+                                    {f.firstName} {f.lastName}{' '}
+                                    <span className="text-muted-foreground font-normal">@{f.username}</span>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => onRemoveFriend(f.id)}
+                                    disabled={removingId === f.id}
+                                    className="border-destructive/40 text-destructive hover:bg-destructive/10 shrink-0 cursor-pointer"
+                                >
+                                    {removingId === f.id ? 'Removing...' : 'Remove'}
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
 
             {/* Search */}
             <section className="border border-border rounded-xl p-4">

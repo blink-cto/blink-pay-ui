@@ -4,7 +4,7 @@ import type { AuthResponse } from '../../shared/types/api'
 export type { AuthResponse }
 
 export type LoginRequest = {
-    username: string
+    email: string
     password: string
 }
 

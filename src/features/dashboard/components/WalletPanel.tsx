@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react'
 import { getMyWallet, initiateTopUp, directTopUp, cashOut } from '../../../shared/api/wallet'
-import type { WalletResponse } from '../../../shared/types/api'
+import { getTransactionFeed } from '../../../shared/api/history'
+import type { TransactionDto, WalletResponse } from '../../../shared/types/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+
+const typeLabel: Record<TransactionDto['type'], string> = {
+    SEND: 'Send',
+    SPLIT: 'Split',
+    TOP_UP: 'Top Up',
+    SETTLE: 'Settle',
+    WITHDRAW: 'Cashout',
+}
 
 export default function WalletPanel() {
     const [wallet, setWallet] = useState<WalletResponse | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    const [recentTx, setRecentTx] = useState<TransactionDto[]>([])
 
     const [topUpAmount, setTopUpAmount] = useState<number>(100)
     const [topUpLoading, setTopUpLoading] = useState(false)
@@ -26,8 +38,12 @@ export default function WalletPanel() {
         setError(null)
         setLoading(true)
         try {
-            const res = await getMyWallet()
-            setWallet(res)
+            const [walletRes, feedRes] = await Promise.all([
+                getMyWallet(),
+                getTransactionFeed(),
+            ])
+            setWallet(walletRes)
+            setRecentTx(feedRes.slice(0, 3))
         } catch {
             setError('Failed to load wallet.')
         } finally {
@@ -81,13 +97,35 @@ export default function WalletPanel() {
 
     return (
         <div className="grid gap-6">
-            {/* Balance */}
-            <div>
-                <h2 className="text-xl font-bold text-foreground mb-1">Wallet</h2>
-                <div className="text-sm text-muted-foreground mb-1">Current balance</div>
-                <div className="text-4xl font-bold text-[#00D4B8]">
-                    R {wallet?.balance ?? 0}
+            {/* Balance + last transaction */}
+            <div className="flex items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-xl font-bold text-foreground mb-1">Wallet</h2>
+                    <div className="text-xs text-muted-foreground mb-1">Current balance</div>
+                    <div className="text-4xl font-bold text-[#00D4B8]">
+                        R {wallet?.balance ?? 0}
+                    </div>
                 </div>
+
+                {recentTx[0] && (() => {
+                    const t = recentTx[0]
+                    const isReceived = t.direction === 'RECEIVED' || t.type === 'TOP_UP'
+                    const counterparty = isReceived ? t.fromUser : t.toUser
+                    return (
+                        <div className="shrink-0 border border-border/50 rounded-xl px-3 py-2.5 bg-secondary/30 text-right min-w-0">
+                            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider">Last transaction</div>
+                            <div className={cn('text-sm font-semibold', isReceived ? 'text-[#00D4B8]' : 'text-[#FF2D78]')}>
+                                {isReceived ? '+' : '−'} R {t.amount}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5">
+                                {typeLabel[t.type]}{counterparty ? ` · ${isReceived ? 'from' : 'to'} ${counterparty.firstName}` : ''}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground/60 mt-0.5">
+                                {new Date(t.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                        </div>
+                    )
+                })()}
             </div>
 
             {/* Top Up */}

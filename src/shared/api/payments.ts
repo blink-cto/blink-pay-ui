@@ -31,6 +31,11 @@ export async function requestMoney(payload: MoneyRequestRequest): Promise<MoneyR
     return res.data
 }
 
+export async function getSentRequests(): Promise<MoneyRequestResponse[]> {
+    const res = await http.get<MoneyRequestResponse[]>('/api/payments/request/sent')
+    return res.data
+}
+
 export async function cancelRequest(requestId: number): Promise<void> {
     await http.post(`/api/payments/request/${requestId}/cancel`)
 }

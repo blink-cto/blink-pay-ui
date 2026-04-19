@@ -132,6 +132,7 @@ export type DebtItem = {
     debtId: number
     amount: number
     reference: string
+    counterpartyId: number
     toUserFirstName: string
     toUserEmail: string
     createdAt: string

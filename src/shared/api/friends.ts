@@ -23,3 +23,7 @@ export async function getIncomingFriendRequests(): Promise<FriendRequestItem[]> 
 export async function respondToFriendRequest(payload: FriendRequestRespondRequest): Promise<void> {
     await http.post('/api/friends/respond', payload)
 }
+
+export async function removeFriend(friendId: number): Promise<void> {
+    await http.delete(`/api/friends/${friendId}`)
+}

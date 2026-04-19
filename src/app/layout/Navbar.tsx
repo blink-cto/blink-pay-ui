@@ -52,7 +52,7 @@ export default function Navbar() {
             <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between md:grid md:grid-cols-3">
                 <NavLink to="/" className="flex items-center gap-2 sm:gap-3 text-foreground no-underline">
                     <img src={logo} alt="Blink Pay" className="h-8 sm:h-10 w-auto" />
-                    <span className="font-bold text-lg sm:text-xl tracking-tight">Blink Pay</span>
+                    <span className="blink-title font-bold text-lg sm:text-xl tracking-tight">Blink Pay</span>
                 </NavLink>
 
                 {/* Desktop nav links */}

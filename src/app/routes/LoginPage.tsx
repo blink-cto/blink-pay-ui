@@ -13,7 +13,7 @@ export default function LoginPage() {
     const navigate = useNavigate()
     const alreadyAuthed = !!getStoredUser()
 
-    const [form, setForm] = useState<LoginRequest>({ username: '', password: '' })
+    const [form, setForm] = useState<LoginRequest>({ email: '', password: '' })
     const [error, setError] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -29,7 +29,7 @@ export default function LoginPage() {
             startSession(res)
             navigate('/dashboard')
         } catch {
-            setError('Login failed. Please check your username and password.')
+            setError('Login failed. Please check your email and password.')
         } finally {
             setIsSubmitting(false)
         }
@@ -46,14 +46,15 @@ export default function LoginPage() {
 
             <form onSubmit={onSubmit} className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="username" className="text-foreground">Username</Label>
+                    <Label htmlFor="email" className="text-foreground">Email</Label>
                     <Input
-                        id="username"
-                        value={form.username}
-                        onChange={(e) => setForm({ ...form, username: e.target.value })}
-                        autoComplete="username"
+                        id="email"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        type="email"
+                        autoComplete="email"
                         required
-                        placeholder="alice123"
+                        placeholder="alice@email.com"
                         className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
                     />
                 </div>

@@ -1,15 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { searchUsers } from '../../../shared/api/users'
-import { sendPayment, createQrLink } from '../../../shared/api/payments'
-import type { UserSearchItem, QrLinkResponse } from '../../../shared/types/api'
+import { sendPayment, createQrLink, requestMoney, getSentRequests, cancelRequest } from '../../../shared/api/payments'
+import type { MoneyRequestResponse, UserSearchItem, QrLinkResponse } from '../../../shared/types/api'
 import { displayName } from '@/shared/utils/userDisplay'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
-type Mode = 'send' | 'receive'
+type Mode = 'send' | 'receive' | 'request'
 
 export default function InstantPayPanel() {
     const [mode, setMode] = useState<Mode>('send')
@@ -25,6 +25,25 @@ export default function InstantPayPanel() {
     const [submitting, setSubmitting] = useState(false)
     const [msg, setMsg] = useState<string | null>(null)
     const [err, setErr] = useState<string | null>(null)
+
+    // ── Sent requests state ───────────────────────────────────
+    const [sentRequests, setSentRequests] = useState<MoneyRequestResponse[]>([])
+    const [sentLoading, setSentLoading] = useState(false)
+    const [cancellingId, setCancellingId] = useState<number | null>(null)
+    const [cancelMsg, setCancelMsg] = useState<string | null>(null)
+    const [cancelErr, setCancelErr] = useState<string | null>(null)
+
+    // ── Request state ─────────────────────────────────────────
+    const [reqQuery, setReqQuery] = useState('')
+    const [reqResults, setReqResults] = useState<UserSearchItem[]>([])
+    const [reqSearchLoading, setReqSearchLoading] = useState(false)
+    const [reqSearchError, setReqSearchError] = useState<string | null>(null)
+    const [reqRecipient, setReqRecipient] = useState<UserSearchItem | null>(null)
+    const [reqAmount, setReqAmount] = useState<number>(0)
+    const [reqNote, setReqNote] = useState('')
+    const [reqSubmitting, setReqSubmitting] = useState(false)
+    const [reqMsg, setReqMsg] = useState<string | null>(null)
+    const [reqErr, setReqErr] = useState<string | null>(null)
 
     // ── Receive / QR state ────────────────────────────────────
     const [qrAmount, setQrAmount] = useState<number>(0)
@@ -76,6 +95,76 @@ export default function InstantPayPanel() {
         }
     }
 
+    // ── Request handlers ──────────────────────────────────────
+    async function onReqSearch() {
+        setReqSearchError(null)
+        const q = reqQuery.trim()
+        if (!q) { setReqResults([]); return }
+        setReqSearchLoading(true)
+        try {
+            setReqResults(await searchUsers(q))
+        } catch {
+            setReqSearchError('User search failed.')
+        } finally {
+            setReqSearchLoading(false)
+        }
+    }
+
+    function selectReqRecipient(u: UserSearchItem) {
+        setReqRecipient(u)
+        setReqResults([])
+        setReqQuery('')
+        setReqMsg(null)
+        setReqErr(null)
+    }
+
+    async function onRequest() {
+        setReqMsg(null); setReqErr(null)
+        if (!reqRecipient) { setReqErr('Please select who to request from.'); return }
+        if (!reqAmount || reqAmount <= 0) { setReqErr('Amount must be greater than 0.'); return }
+
+        setReqSubmitting(true)
+        try {
+            const res = await requestMoney({ toUserId: reqRecipient.id, amount: reqAmount, note: reqNote.trim() || undefined })
+            setReqMsg(`Request #${res.requestId} sent to ${displayName(reqRecipient)} for R ${res.amount}.`)
+            setReqRecipient(null)
+            setReqAmount(0)
+            setReqNote('')
+        } catch (e) {
+            setReqErr(e instanceof Error ? e.message : 'Request failed.')
+        } finally {
+            setReqSubmitting(false)
+        }
+    }
+
+    async function loadSentRequests() {
+        setSentLoading(true)
+        try {
+            setSentRequests(await getSentRequests())
+        } catch {
+            // non-critical, fail silently
+        } finally {
+            setSentLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (mode === 'request') void loadSentRequests()
+    }, [mode])
+
+    async function onCancel(requestId: number) {
+        setCancelMsg(null); setCancelErr(null); setCancellingId(requestId)
+        try {
+            await cancelRequest(requestId)
+            setCancelMsg('Request cancelled.')
+            await loadSentRequests()
+        } catch (e) {
+            setCancelErr(e instanceof Error ? e.message : 'Cancel failed.')
+        } finally {
+            setCancellingId(null)
+        }
+    }
+
     // ── Receive / QR handlers ─────────────────────────────────
     async function onGenerateQr() {
         setGenErr(null)
@@ -121,13 +210,15 @@ export default function InstantPayPanel() {
                 <div>
                     <h2 className="text-xl font-bold text-foreground mb-1">Instant Pay</h2>
                     <p className="text-sm text-muted-foreground">
-                        {mode === 'send' ? "Send money directly to another user's wallet." : 'Generate a QR link so someone can pay you.'}
+                        {mode === 'send' ? "Send money directly to another user's wallet."
+                            : mode === 'receive' ? 'Generate a QR link so someone can pay you.'
+                            : 'Request money from another user.'}
                     </p>
                 </div>
 
-                {/* Send / Receive toggle */}
+                {/* Send / Receive / Request toggle */}
                 <div className="flex gap-1 p-1 rounded-full bg-secondary/60 shrink-0">
-                    {(['send', 'receive'] as Mode[]).map((m) => (
+                    {(['send', 'receive', 'request'] as Mode[]).map((m) => (
                         <button
                             key={m}
                             onClick={() => setMode(m)}
@@ -138,7 +229,7 @@ export default function InstantPayPanel() {
                                     : 'text-muted-foreground hover:text-foreground'
                             )}
                         >
-                            {m === 'send' ? 'Send' : 'Receive'}
+                            {m === 'send' ? 'Send' : m === 'receive' ? 'Receive' : 'Request'}
                         </button>
                     ))}
                 </div>
@@ -260,6 +351,181 @@ export default function InstantPayPanel() {
                         </Button>
                     </section>
                 </>
+            )}
+
+            {/* ── REQUEST VIEW ──────────────────────────────────── */}
+            {mode === 'request' && (
+                <>
+                    {(reqMsg || reqErr) && (
+                        <div className={`rounded-lg border px-4 py-3 text-sm ${
+                            reqErr
+                                ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                                : 'border-[#00D4B8]/30 bg-[#00D4B8]/10 text-[#00D4B8]'
+                        }`}>
+                            {reqErr ?? reqMsg}
+                        </div>
+                    )}
+
+                    <section className="border border-border rounded-xl p-4">
+                        <h3 className="text-sm font-semibold text-foreground mb-3">Request from</h3>
+
+                        {reqRecipient ? (
+                            <div className="flex items-center justify-between bg-secondary/50 border border-[#00D4B8]/30 rounded-lg p-3">
+                                <div className="font-semibold text-foreground text-sm">
+                                    {displayName(reqRecipient)}{' '}
+                                    <span className="text-muted-foreground font-normal">@{reqRecipient.username}</span>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setReqRecipient(null)}
+                                    className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+                                >
+                                    Change
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex gap-3">
+                                    <Input
+                                        value={reqQuery}
+                                        onChange={(e) => setReqQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && onReqSearch()}
+                                        placeholder="Search by name or username"
+                                        className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
+                                    />
+                                    <Button
+                                        onClick={onReqSearch}
+                                        disabled={reqSearchLoading}
+                                        className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold shrink-0 cursor-pointer"
+                                    >
+                                        {reqSearchLoading ? 'Searching…' : 'Search'}
+                                    </Button>
+                                </div>
+
+                                {reqSearchError && (
+                                    <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                                        {reqSearchError}
+                                    </div>
+                                )}
+
+                                <div className="mt-3 grid gap-2">
+                                    {reqResults.map((u) => (
+                                        <div key={u.id} className="bg-secondary/50 border border-border rounded-lg p-3 flex justify-between items-center gap-3">
+                                            <div className="font-semibold text-foreground text-sm">
+                                                {displayName(u)}{' '}
+                                                <span className="text-muted-foreground font-normal">@{u.username}</span>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                onClick={() => selectReqRecipient(u)}
+                                                className="bg-[#00D4B8] text-[#09090B] hover:bg-[#00BFA5] font-semibold shrink-0 cursor-pointer"
+                                            >
+                                                Select
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </section>
+
+                    <section className="border border-border rounded-xl p-4">
+                        <h3 className="text-sm font-semibold text-foreground mb-4">Request details</h3>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-foreground">Amount (ZAR)</Label>
+                                <Input
+                                    type="number"
+                                    min={1}
+                                    value={reqAmount || ''}
+                                    onChange={(e) => setReqAmount(Number(e.target.value))}
+                                    placeholder="0.00"
+                                    className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-foreground">
+                                    Note <span className="text-muted-foreground font-normal">(optional)</span>
+                                </Label>
+                                <Input
+                                    value={reqNote}
+                                    onChange={(e) => setReqNote(e.target.value)}
+                                    placeholder="e.g. Dinner"
+                                    className="bg-secondary border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D4B8]"
+                                />
+                            </div>
+                        </div>
+
+                        <Button
+                            onClick={onRequest}
+                            disabled={reqSubmitting || !reqRecipient}
+                            className="mt-4 bg-[#9B6DFF] text-white hover:bg-[#8B5CF6] font-semibold cursor-pointer disabled:opacity-50"
+                        >
+                            {reqSubmitting ? 'Requesting…' : `Request${reqRecipient ? ` from ${displayName(reqRecipient)}` : ''}`}
+                        </Button>
+                    </section>
+                </>
+            )}
+
+            {/* ── SENT REQUESTS (inside Request view) ─────────── */}
+            {mode === 'request' && (
+                <section className="border border-border rounded-xl p-4">
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-sm font-semibold text-foreground">Pending sent requests</h3>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={loadSentRequests}
+                            disabled={sentLoading}
+                            className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+                        >
+                            {sentLoading ? 'Loading…' : 'Refresh'}
+                        </Button>
+                    </div>
+
+                    {(cancelMsg || cancelErr) && (
+                        <div className={`mb-3 rounded-lg border px-4 py-3 text-sm ${
+                            cancelErr
+                                ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                                : 'border-[#00D4B8]/30 bg-[#00D4B8]/10 text-[#00D4B8]'
+                        }`}>
+                            {cancelErr ?? cancelMsg}
+                        </div>
+                    )}
+
+                    {sentRequests.length === 0 ? (
+                        <div className="text-sm text-muted-foreground">No pending requests.</div>
+                    ) : (
+                        <div className="grid gap-2">
+                            {sentRequests.map((r) => (
+                                <div key={r.requestId} className="bg-secondary/50 border border-border rounded-lg p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                                    <div className="grid gap-0.5">
+                                        <div className="font-semibold text-foreground text-sm">
+                                            Requested from {r.from.firstName}
+                                            <span className="text-muted-foreground font-normal ml-1">({r.from.email})</span>
+                                        </div>
+                                        {r.note && <div className="text-xs text-muted-foreground">"{r.note}"</div>}
+                                        <div className="text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleString()}</div>
+                                    </div>
+                                    <div className="flex items-center gap-3 shrink-0">
+                                        <div className="font-bold text-[#00D4B8]">R {r.amount}</div>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => onCancel(r.requestId)}
+                                            disabled={cancellingId === r.requestId}
+                                            className="border-destructive/40 text-destructive hover:bg-destructive/10 cursor-pointer"
+                                        >
+                                            {cancellingId === r.requestId ? 'Cancelling…' : 'Cancel'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
             )}
 
             {/* ── RECEIVE / QR VIEW ─────────────────────────────── */}

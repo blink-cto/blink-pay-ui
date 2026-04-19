@@ -114,6 +114,30 @@
     --brand-purple: #9B6DFF;
 }
 
+/* ─── Navbar title wave animation ─────────────────────────────────── */
+@keyframes blink-wave {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+.blink-title {
+    background: linear-gradient(
+        90deg,
+        #ffffff 0%,
+        #00D4B8 17%,
+        #4B7BFF 36%,
+        #9B6DFF 54%,
+        #FF2D78 72%,
+        #00D4B8 88%,
+        #00D4B8 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: blink-wave 3s linear infinite;
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
