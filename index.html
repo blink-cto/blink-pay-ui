@@ -1,623 +1,1004 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Blink Pay | Direct QR &amp; Instant EFT for South Africa</title>
+    <title>Blink Pay | Instant EFT &amp; QR Payments for South Africa</title>
     <meta name="description" content="The unified payment layer for South Africa's informal economy. 1% flat fees, zero hardware, instant bank-to-bank settlements. POPIA compliant.">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        magenta: {
-                            400: '#e879f9',
-                            500: '#d946ef',
-                            600: '#c026d3',
-                            700: '#a21caf',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #e2e8f0; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .gradient-text { background: linear-gradient(90deg, #06b6d4, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-shadow { filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.5)); }
-        .page-enter { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* ── Base ─────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #09090B;
+            color: #fafafa;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* ── Brand colours ───────────────────────────────── */
+        :root {
+            --teal:   #00D4B8;
+            --pink:   #FF2D78;
+            --purple: #9B6DFF;
+            --blue:   #4B7BFF;
+            --bg:     #09090B;
+            --card:   #141417;
+            --border: #27272A;
+            --muted:  #71717A;
+        }
+
+        /* ── Animated title gradient ─────────────────────── */
+        @keyframes blink-wave {
+            0%   { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .blink-title {
+            background: linear-gradient(90deg,
+                #fff 0%, #00D4B8 17%, #4B7BFF 36%,
+                #9B6DFF 54%, #FF2D78 72%, #00D4B8 88%, #00D4B8 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: blink-wave 3s linear infinite;
+        }
+
+        /* ── Gradient text (static) ──────────────────────── */
+        .gradient-text {
+            background: linear-gradient(90deg, #00D4B8, #4B7BFF 50%, #FF2D78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Card ────────────────────────────────────────── */
+        .card {
+            background: #141417;
+            border: 1px solid #27272A;
+            border-radius: 1rem;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        /* ── Page fade-up ─────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .page-enter { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+        /* ── Scrollbar ───────────────────────────────────── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #09090B; }
+        ::-webkit-scrollbar-thumb { background: #27272A; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #71717A; }
+
+        /* ── Glow blobs ──────────────────────────────────── */
+        .blob-teal   { background: radial-gradient(circle, rgba(0,212,184,0.07) 0%, transparent 70%); }
+        .blob-pink   { background: radial-gradient(circle, rgba(255,45,120,0.06) 0%, transparent 70%); }
+        .blob-purple { background: radial-gradient(circle, rgba(155,109,255,0.06) 0%, transparent 70%); }
+
+        /* ── Nav active indicator ─────────────────────────── */
+        .nav-active {
+            color: #fafafa;
+            position: relative;
+        }
+        .nav-active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0; right: 0;
+            height: 2px;
+            border-radius: 9999px;
+            background: #00D4B8;
+        }
+
+        /* ── Alpine cloak ─────────────────────────────────── */
         [x-cloak] { display: none !important; }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        /* ── Accordion chevron ────────────────────────────── */
+        .chevron-open { transform: rotate(180deg); }
+
+        /* ── Table ───────────────────────────────────────── */
+        .compare-table th, .compare-table td { padding: 1rem 1.25rem; text-align: left; }
+        .compare-table tr { border-bottom: 1px solid #27272A; }
+        .compare-table tr:last-child { border-bottom: none; }
     </style>
 </head>
-<body x-data="{ page: 'home', mobileMenu: false, formSent: false, popiConsent: false }" class="antialiased selection:bg-cyan-500 selection:text-white">
+<body x-data="{ page: 'home', mobileMenu: false, formSent: false, popiConsent: false }">
 
-    <nav class="fixed w-full z-50 glass border-b border-white/5 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3 cursor-pointer group" @click="page = 'home'; mobileMenu = false">
-                <img src="logo.png" alt="Blink Pay" class="h-10 logo-shadow group-hover:scale-105 transition-transform duration-300">
-                <span class="text-xl font-black tracking-tighter uppercase italic gradient-text py-0.5">Blink Pay</span>
-            </div>
+<!-- ═══════════════════════════════════════════════════════ NAVBAR -->
+<header class="sticky top-0 z-50 border-b"
+        style="background:rgba(9,9,11,0.9);backdrop-filter:blur(16px);border-color:#27272A;">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
 
-            <div class="hidden lg:flex items-center space-x-5 xl:space-x-6">
-                <button @click="page = 'home'" :class="page === 'home' ? 'text-cyan-400' : 'text-slate-400'" class="text-[10px] font-black uppercase tracking-widest hover:text-white transition">Home</button>
-                <button @click="page = 'about'" :class="page === 'about' ? 'text-cyan-400' : 'text-slate-400'" class="text-[10px] font-black uppercase tracking-widest hover:text-white transition">About Us</button>
-                <button @click="page = 'solutions'" :class="page === 'solutions' ? 'text-cyan-400' : 'text-slate-400'" class="text-[10px] font-black uppercase tracking-widest hover:text-white transition">Product</button>
-                <button @click="page = 'market'" :class="page === 'market' ? 'text-cyan-400' : 'text-slate-400'" class="text-[10px] font-black uppercase tracking-widest hover:text-white transition">Data</button>
-                <button @click="page = 'popia'" :class="page === 'popia' ? 'text-cyan-400' : 'text-slate-400'" class="text-[10px] font-black uppercase tracking-widest hover:text-white transition">POPIA</button>
-                <button @click="page = 'contact'" :class="page === 'contact' ? 'text-cyan-400' : 'text-slate-400'" class="text-[10px] font-black uppercase tracking-widest hover:text-white transition">Join Network</button>
-                <button @click="page = 'investors'" class="bg-gradient-to-r from-cyan-600 to-magenta-600 px-6 py-2.5 rounded-full text-[10px] font-black text-white uppercase tracking-tighter hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition duration-300">R5M Seed Round</button>
-            </div>
+        <!-- Logo -->
+        <button @click="page='home';mobileMenu=false"
+                class="flex items-center gap-2.5 cursor-pointer bg-transparent border-0 p-0">
+            <img src="logo.png" alt="Blink Pay" class="h-9 w-auto">
+            <span class="blink-title font-bold text-lg tracking-tight">Blink Pay</span>
+        </button>
 
-            <button class="lg:hidden text-white p-2" @click="mobileMenu = !mobileMenu">
-                <svg x-show="!mobileMenu" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                <svg x-show="mobileMenu" x-cloak class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <!-- Desktop nav -->
+        <nav class="hidden md:flex items-center gap-7">
+            <button @click="page='home'"
+                    :class="page==='home' ? 'nav-active text-white' : 'text-zinc-400 hover:text-white'"
+                    class="relative text-sm font-medium transition-colors bg-transparent border-0 cursor-pointer pb-0.5">
+                Home
+            </button>
+            <button @click="page='about'"
+                    :class="page==='about' ? 'nav-active text-white' : 'text-zinc-400 hover:text-white'"
+                    class="relative text-sm font-medium transition-colors bg-transparent border-0 cursor-pointer pb-0.5">
+                About
+            </button>
+            <button @click="page='solutions'"
+                    :class="page==='solutions' ? 'nav-active text-white' : 'text-zinc-400 hover:text-white'"
+                    class="relative text-sm font-medium transition-colors bg-transparent border-0 cursor-pointer pb-0.5">
+                Product
+            </button>
+            <button @click="page='market'"
+                    :class="page==='market' ? 'nav-active text-white' : 'text-zinc-400 hover:text-white'"
+                    class="relative text-sm font-medium transition-colors bg-transparent border-0 cursor-pointer pb-0.5">
+                Market Data
+            </button>
+            <button @click="page='popia'"
+                    :class="page==='popia' ? 'nav-active text-white' : 'text-zinc-400 hover:text-white'"
+                    class="relative text-sm font-medium transition-colors bg-transparent border-0 cursor-pointer pb-0.5">
+                POPIA
+            </button>
+        </nav>
+
+        <!-- Desktop CTA buttons -->
+        <div class="hidden md:flex items-center gap-3">
+            <button @click="page='contact'"
+                    class="text-sm font-medium text-zinc-400 hover:text-white transition-colors bg-transparent border-0 cursor-pointer">
+                Join Network
+            </button>
+            <button @click="page='investors'"
+                    class="text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition-all"
+                    style="background:#00D4B8;color:#09090B;box-shadow:0 4px 16px rgba(0,212,184,0.2);"
+                    onmouseover="this.style.background='#00BFA5'" onmouseout="this.style.background='#00D4B8'">
+                R5M Seed Round
             </button>
         </div>
 
-        <div x-show="mobileMenu" x-transition.opacity class="lg:hidden glass border-b border-white/5 absolute w-full top-20 left-0 py-4 px-6 space-y-4 shadow-2xl">
-            <button @click="page = 'home'; mobileMenu = false" class="block w-full text-left text-sm font-bold text-white uppercase">Home</button>
-            <button @click="page = 'about'; mobileMenu = false" class="block w-full text-left text-sm font-bold text-white uppercase">About Us</button>
-            <button @click="page = 'solutions'; mobileMenu = false" class="block w-full text-left text-sm font-bold text-white uppercase">The Product</button>
-            <button @click="page = 'market'; mobileMenu = false" class="block w-full text-left text-sm font-bold text-white uppercase">Market Data</button>
-            <button @click="page = 'popia'; mobileMenu = false" class="block w-full text-left text-sm font-bold text-white uppercase">POPIA &amp; Privacy</button>
-            <button @click="page = 'contact'; mobileMenu = false" class="block w-full text-left text-sm font-bold text-white uppercase">Join Network</button>
-            <button @click="page = 'investors'; mobileMenu = false" class="block w-full text-left text-sm font-black text-cyan-400 uppercase pt-2 border-t border-white/10">Investors</button>
+        <!-- Hamburger -->
+        <button class="md:hidden text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer p-1"
+                @click="mobileMenu=!mobileMenu" aria-label="Toggle menu">
+            <svg x-show="!mobileMenu" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <svg x-show="mobileMenu" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div x-show="mobileMenu" x-cloak
+         x-transition:enter="transition duration-200 ease-out"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="md:hidden border-t px-4 py-4 flex flex-col gap-1"
+         style="border-color:#27272A;background:#09090B;">
+        <button @click="page='home';mobileMenu=false"
+                class="text-left text-sm font-medium py-2.5 border-b transition-colors bg-transparent border-x-0 border-t-0 cursor-pointer w-full"
+                :class="page==='home'?'text-[#00D4B8]':'text-zinc-400'"
+                style="border-color:#27272A;">Home</button>
+        <button @click="page='about';mobileMenu=false"
+                class="text-left text-sm font-medium py-2.5 border-b transition-colors bg-transparent border-x-0 border-t-0 cursor-pointer w-full"
+                :class="page==='about'?'text-[#00D4B8]':'text-zinc-400'"
+                style="border-color:#27272A;">About</button>
+        <button @click="page='solutions';mobileMenu=false"
+                class="text-left text-sm font-medium py-2.5 border-b transition-colors bg-transparent border-x-0 border-t-0 cursor-pointer w-full"
+                :class="page==='solutions'?'text-[#00D4B8]':'text-zinc-400'"
+                style="border-color:#27272A;">Product</button>
+        <button @click="page='market';mobileMenu=false"
+                class="text-left text-sm font-medium py-2.5 border-b transition-colors bg-transparent border-x-0 border-t-0 cursor-pointer w-full"
+                :class="page==='market'?'text-[#00D4B8]':'text-zinc-400'"
+                style="border-color:#27272A;">Market Data</button>
+        <button @click="page='popia';mobileMenu=false"
+                class="text-left text-sm font-medium py-2.5 border-b transition-colors bg-transparent border-x-0 border-t-0 cursor-pointer w-full"
+                :class="page==='popia'?'text-[#00D4B8]':'text-zinc-400'"
+                style="border-color:#27272A;">POPIA</button>
+        <button @click="page='contact';mobileMenu=false"
+                class="text-left text-sm font-medium py-2.5 border-b transition-colors bg-transparent border-x-0 border-t-0 cursor-pointer w-full"
+                :class="page==='contact'?'text-[#00D4B8]':'text-zinc-400'"
+                style="border-color:#27272A;">Join Network</button>
+        <div class="pt-3">
+            <button @click="page='investors';mobileMenu=false"
+                    class="w-full text-sm font-semibold py-2.5 rounded-lg cursor-pointer"
+                    style="background:#00D4B8;color:#09090B;">
+                R5M Seed Round
+            </button>
         </div>
-    </nav>
+    </div>
+</header>
 
-    <!-- HOME -->
-    <main x-show="page === 'home'" class="page-enter pt-40 pb-24 px-6 min-h-screen flex flex-col justify-center">
-        <div class="max-w-5xl mx-auto text-center">
-            <div class="inline-block border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 rounded-full text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-8">
-                Pioneering Instant EFT for SMEs
-            </div>
-            <h1 class="text-6xl md:text-8xl lg:text-9xl font-black text-white mb-8 leading-[0.85] uppercase tracking-tighter italic">Banking<br>the <span class="gradient-text">Informal.</span></h1>
-            <p class="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">The unified payment layer for South Africa's R1.1 Trillion township economy. Instant bank-to-bank settlement. 1% flat fee. <b>No cards. No cash. No friction.</b></p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button @click="page = 'contact'" class="bg-white text-slate-950 px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-cyan-400 transition duration-300 shadow-lg shadow-white/10">Become a Merchant</button>
-                <button @click="page = 'solutions'" class="border border-white/10 glass text-white px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/5 transition duration-300">How It Works</button>
-            </div>
-            <p class="mt-10 text-[10px] text-slate-600 uppercase tracking-widest">POPIA Compliant &bull; SARB Aligned &bull; BankservAfrica Rails &bull; FSCA Aware</p>
+
+<!-- ═══════════════════════════════════════════════════════ HOME -->
+<main x-show="page==='home'" class="page-enter">
+
+    <!-- Hero -->
+    <section class="relative flex flex-col items-center justify-center text-center px-6 pt-28 pb-24 overflow-hidden">
+        <div class="pointer-events-none absolute inset-0 overflow-hidden">
+            <div class="blob-teal absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[120px]"></div>
+            <div class="blob-pink absolute top-20 -right-20 w-[400px] h-[400px] rounded-full blur-[100px]"></div>
+            <div class="blob-purple absolute top-40 -left-20 w-[350px] h-[350px] rounded-full blur-[100px]"></div>
         </div>
-    </main>
 
-    <!-- ABOUT -->
-    <main x-show="page === 'about'" class="page-enter pt-32 px-6 pb-20">
-        <div class="max-w-5xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-black text-white mb-6 uppercase italic text-center">Built for <span class="gradient-text">Mzansi.</span></h2>
-            <p class="text-center text-slate-400 max-w-2xl mx-auto mb-16 text-lg">Headquartered in Pretoria, Blink Pay is engineered specifically for the realities of the South African economy.</p>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mb-20">
-                <div class="glass p-10 rounded-[3rem] border-white/5 shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl"></div>
-                    <h3 class="text-2xl font-black text-white uppercase italic mb-4">Our Mission</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed">For decades, traditional banks have ignored the informal sector, imposing high hardware costs and monthly rental fees that excluded spaza shops, street vendors, and independent mechanics. Our mission is to democratise digital commerce by utilising the technology everyone already has: the smartphone.</p>
-                </div>
-                <div class="glass p-10 rounded-[3rem] border-white/5 shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-magenta-500/10 rounded-full blur-3xl"></div>
-                    <h3 class="text-2xl font-black text-white uppercase italic mb-4">The Innovation</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed">By pivoting away from expensive NFC/Card tapping and embracing Instant EFT (Electronic Funds Transfer) and Dynamic QR codes, we bypass the legacy 3.5% interchange fees. We pass these massive savings directly to the merchant, empowering them to grow their businesses safely, without the risk of holding cash.</p>
-                </div>
+        <div class="relative z-10 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-medium mb-6"
+                 style="border-color:rgba(0,212,184,0.3);background:rgba(0,212,184,0.05);color:#00D4B8;">
+                <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:#00D4B8;"></span>
+                Now in early access — South Africa
             </div>
 
-            <!-- Regulatory Commitment -->
-            <div class="glass p-10 rounded-[3rem] border-white/5 shadow-xl mb-12">
-                <h3 class="text-2xl font-black text-white uppercase italic mb-6">Regulatory Commitment</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
-                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-white font-bold text-sm mb-1">POPIA Compliant</p>
-                            <p class="text-slate-400 text-xs leading-relaxed">We operate under the Protection of Personal Information Act 4 of 2013, with a designated Information Officer and documented data handling procedures.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
-                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-white font-bold text-sm mb-1">SARB Aligned</p>
-                            <p class="text-slate-400 text-xs leading-relaxed">All payment flows operate within the South African Reserve Bank's National Payment System (NPS) framework and Instant EFT guidelines.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
-                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-white font-bold text-sm mb-1">FICA Aware</p>
-                            <p class="text-slate-400 text-xs leading-relaxed">Merchant onboarding follows Financial Intelligence Centre Act requirements for identity verification and transaction monitoring where applicable.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
-                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-white font-bold text-sm mb-1">BankservAfrica Rails</p>
-                            <p class="text-slate-400 text-xs leading-relaxed">Transactions route through BankservAfrica's regulated Immediate Payment (ImPay) infrastructure — the same rails used by South Africa's major banks.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] mb-6">
+                Banking the<br><span class="gradient-text">Informal Economy.</span>
+            </h1>
 
-    <!-- PRODUCT -->
-    <main x-show="page === 'solutions'" class="page-enter pt-32 px-6 pb-20">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-black text-white mb-4 uppercase italic">Pure <span class="text-cyan-400">Rails.</span></h2>
-            <p class="text-slate-400 mb-16 max-w-2xl text-lg">By removing card hardware and legacy banking lag, we've built the fastest path for money to move from customer to merchant.</p>
+            <p class="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-10 leading-relaxed">
+                The unified payment layer for South Africa's R1.1 Trillion township economy.
+                Instant bank-to-bank settlement. 1% flat fee.
+                <strong class="text-zinc-200">No cards. No cash. No friction.</strong>
+            </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
-                <div class="glass p-8 rounded-3xl border-t-2 border-cyan-500 hover:-translate-y-2 transition duration-300">
-                    <span class="text-4xl font-black text-white/5 mb-4 block">01</span>
-                    <h4 class="text-white font-bold uppercase text-sm mb-2">Scan QR</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">The customer scans the dynamic QR code displayed on the merchant's phone or counter.</p>
-                </div>
-                <div class="glass p-8 rounded-3xl border-t-2 border-cyan-500 hover:-translate-y-2 transition duration-300 delay-75">
-                    <span class="text-4xl font-black text-white/5 mb-4 block">02</span>
-                    <h4 class="text-white font-bold uppercase text-sm mb-2">Authenticate</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">Customer securely approves the payment via their existing, trusted banking app.</p>
-                </div>
-                <div class="glass p-8 rounded-3xl border-t-2 border-cyan-500 hover:-translate-y-2 transition duration-300 delay-150">
-                    <span class="text-4xl font-black text-white/5 mb-4 block">03</span>
-                    <h4 class="text-white font-bold uppercase text-sm mb-2">Instant EFT</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">Funds move directly via highly secure, real-time Instant EFT infrastructure.</p>
-                </div>
-                <div class="glass p-8 rounded-3xl border-t-2 border-cyan-500 hover:-translate-y-2 transition duration-300 delay-200">
-                    <span class="text-4xl font-black text-white/5 mb-4 block">04</span>
-                    <h4 class="text-white font-bold uppercase text-sm mb-2">Settlement</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">Merchant receives immediate confirmation and instant access to working capital.</p>
-                </div>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button @click="page='contact'"
+                        class="text-sm font-semibold px-8 py-3 rounded-lg cursor-pointer transition-all"
+                        style="background:#00D4B8;color:#09090B;box-shadow:0 4px 24px rgba(0,212,184,0.25);"
+                        onmouseover="this.style.background='#00BFA5'" onmouseout="this.style.background='#00D4B8'">
+                    Become a Merchant
+                </button>
+                <button @click="page='solutions'"
+                        class="text-sm font-semibold px-8 py-3 rounded-lg cursor-pointer transition-colors"
+                        style="border:1px solid #27272A;color:#A1A1AA;background:transparent;"
+                        onmouseover="this.style.color='#fafafa'" onmouseout="this.style.color='#A1A1AA'">
+                    How It Works
+                </button>
             </div>
 
-            <div class="mb-24">
-                <div class="text-center mb-10">
-                    <h3 class="text-3xl font-black text-white uppercase italic">Why Merchants Switch</h3>
-                    <p class="text-slate-400 text-sm mt-2">The math is simple. Stop paying banks for the privilege of running your business.</p>
-                </div>
-
-                <div class="glass rounded-[2rem] border-white/10 overflow-hidden max-w-4xl mx-auto shadow-2xl">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-900/80 border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                <th class="p-6 w-1/3">Feature</th>
-                                <th class="p-6 w-1/3 border-l border-white/5">Traditional POS</th>
-                                <th class="p-6 w-1/3 bg-cyan-950/30 text-cyan-400 border-l border-cyan-500/30">Blink Pay</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm">
-                            <tr class="border-b border-white/5">
-                                <td class="p-6 font-bold text-white">Transaction Fee</td>
-                                <td class="p-6 text-slate-400 border-l border-white/5">Up to 3.5%</td>
-                                <td class="p-6 text-white font-black bg-cyan-950/20 border-l border-cyan-500/30">1.0% Flat</td>
-                            </tr>
-                            <tr class="border-b border-white/5">
-                                <td class="p-6 font-bold text-white">Monthly Rental</td>
-                                <td class="p-6 text-slate-400 border-l border-white/5">R350 - R500 / month</td>
-                                <td class="p-6 text-white font-black bg-cyan-950/20 border-l border-cyan-500/30">R0 (Free App)</td>
-                            </tr>
-                            <tr class="border-b border-white/5">
-                                <td class="p-6 font-bold text-white">Hardware Required</td>
-                                <td class="p-6 text-slate-400 border-l border-white/5">Card Machine / SIM</td>
-                                <td class="p-6 text-white font-black bg-cyan-950/20 border-l border-cyan-500/30">Just a Smartphone</td>
-                            </tr>
-                            <tr>
-                                <td class="p-6 font-bold text-white">Settlement Speed</td>
-                                <td class="p-6 text-slate-400 border-l border-white/5">24 - 48 Hours</td>
-                                <td class="p-6 text-green-400 font-black bg-cyan-950/20 border-l border-cyan-500/30">Instant (Seconds)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="max-w-3xl mx-auto mb-24" x-data="{ activeAccordion: null }">
-                <h3 class="text-2xl font-black text-white uppercase italic mb-8 text-center">Frequently Asked Questions</h3>
-
-                <div class="space-y-4">
-                    <div class="glass border-white/5 rounded-2xl overflow-hidden">
-                        <button @click="activeAccordion = activeAccordion === 1 ? null : 1" class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                            <span class="font-bold text-white text-sm">Do I need a special bank account?</span>
-                            <svg class="w-5 h-5 text-cyan-400 transform transition-transform duration-300" :class="{'rotate-180': activeAccordion === 1}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div x-show="activeAccordion === 1" x-cloak class="px-6 pb-5 text-xs text-slate-400 leading-relaxed">
-                            No. Blink Pay settles directly into your existing South African bank account (e.g., Capitec, FNB, Standard Bank, Nedbank). You do not need to open a new account to use our platform.
-                        </div>
-                    </div>
-                    <div class="glass border-white/5 rounded-2xl overflow-hidden">
-                        <button @click="activeAccordion = activeAccordion === 2 ? null : 2" class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                            <span class="font-bold text-white text-sm">What if my customer doesn't have data?</span>
-                            <svg class="w-5 h-5 text-cyan-400 transform transition-transform duration-300" :class="{'rotate-180': activeAccordion === 2}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div x-show="activeAccordion === 2" x-cloak class="px-6 pb-5 text-xs text-slate-400 leading-relaxed">
-                            Because we integrate deeply with major banking apps, many of these apps are zero-rated for data by telecom providers. Alternatively, merchants can sell them a Blink Pay Airtime/Data voucher directly from the merchant dashboard!
-                        </div>
-                    </div>
-                    <div class="glass border-white/5 rounded-2xl overflow-hidden">
-                        <button @click="activeAccordion = activeAccordion === 3 ? null : 3" class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                            <span class="font-bold text-white text-sm">Is it safe from fraud?</span>
-                            <svg class="w-5 h-5 text-cyan-400 transform transition-transform duration-300" :class="{'rotate-180': activeAccordion === 3}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div x-show="activeAccordion === 3" x-cloak class="px-6 pb-5 text-xs text-slate-400 leading-relaxed">
-                            Absolutely. Since the customer authenticates the payment using their own banking app (using fingerprint or face ID), chargebacks and card-skimming fraud are virtually eliminated. Blink Pay uses bank-grade encryption to protect all data.
-                        </div>
-                    </div>
-                    <div class="glass border-white/5 rounded-2xl overflow-hidden">
-                        <button @click="activeAccordion = activeAccordion === 4 ? null : 4" class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                            <span class="font-bold text-white text-sm">What personal information does Blink Pay collect about me?</span>
-                            <svg class="w-5 h-5 text-cyan-400 transform transition-transform duration-300" :class="{'rotate-180': activeAccordion === 4}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div x-show="activeAccordion === 4" x-cloak class="px-6 pb-5 text-xs text-slate-400 leading-relaxed">
-                            For merchant onboarding we collect your full name, business name, phone number, and general location. We do not store customer banking credentials — those remain with your bank. Full details of data collection, retention, and your rights are available on our <button @click="activeAccordion = null; page = 'popia'" class="text-cyan-400 underline">POPIA &amp; Privacy page</button>.
-                        </div>
-                    </div>
-                    <div class="glass border-white/5 rounded-2xl overflow-hidden">
-                        <button @click="activeAccordion = activeAccordion === 5 ? null : 5" class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                            <span class="font-bold text-white text-sm">Can I request deletion of my data?</span>
-                            <svg class="w-5 h-5 text-cyan-400 transform transition-transform duration-300" :class="{'rotate-180': activeAccordion === 5}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div x-show="activeAccordion === 5" x-cloak class="px-6 pb-5 text-xs text-slate-400 leading-relaxed">
-                            Yes. Under POPIA you have the right to request access to, correction of, or deletion of your personal information held by Blink Pay. Contact our Information Officer at <span class="text-cyan-400">privacy@blinkpay.co.za</span> with your request. Note that we are required to retain transaction records for a minimum of 5 years under FICA regulations.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center max-w-3xl mx-auto">
-                <svg class="w-12 h-12 text-slate-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                <h3 class="text-xl font-black text-white uppercase mb-2">Bank-Grade Security</h3>
-                <p class="text-xs text-slate-400 leading-relaxed">Blink Pay does not store customer banking credentials. All Instant EFT transactions are processed through highly regulated, encrypted channels complying with South African Reserve Bank (SARB) and POPIA standards.</p>
-            </div>
-        </div>
-    </main>
-
-    <!-- MARKET DATA -->
-    <main x-show="page === 'market'" class="page-enter pt-32 px-6 pb-20">
-        <div class="max-w-7xl mx-auto text-center">
-            <h2 class="text-4xl md:text-5xl font-black text-white mb-16 uppercase italic">The Opportunity <span class="gradient-text">in Numbers.</span></h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-                <div class="glass p-8 rounded-[2.5rem] border-b-2 border-cyan-500">
-                    <p class="text-4xl md:text-5xl font-black text-white mb-2 italic">R1.1T</p>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Informal Economy TAM</p>
-                </div>
-                <div class="glass p-8 rounded-[2.5rem] border-b-2 border-magenta-500">
-                    <p class="text-4xl md:text-5xl font-black text-white mb-2 italic">79%</p>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Smartphone Penetration</p>
-                </div>
-                <div class="glass p-8 rounded-[2.5rem] border-b-2 border-white/20">
-                    <p class="text-4xl md:text-5xl font-black text-white mb-2 italic">1%</p>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blink Pay Flat Fee</p>
-                </div>
-                <div class="glass p-8 rounded-[2.5rem] border-b-2 border-white/20">
-                    <p class="text-4xl md:text-5xl font-black text-white mb-2 italic">&lt;10s</p>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">EFT Settlement Speed</p>
-                </div>
-            </div>
-
-            <div class="glass p-8 md:p-12 rounded-[3rem] text-left max-w-4xl mx-auto border-white/5 shadow-2xl mt-12">
-                <h3 class="text-2xl font-black text-white mb-4 uppercase italic">Why Instant EFT is Winning</h3>
-                <p class="text-slate-400 text-sm leading-relaxed mb-6">Traditional POS hardware is too expensive for a fruit vendor or small spaza. Card interchange fees (averaging 3.5%) eat directly into their profits. However, with 79% of South Africans now using smartphones, banking apps are universally accessible.</p>
-                <p class="text-slate-400 text-sm leading-relaxed">Blink Pay leverages this. By replacing hardware with a simple QR code and routing payments through Instant EFT rails, we collapse the cost structure, making digital payments cheaper and safer than handling cash.</p>
-            </div>
-        </div>
-    </main>
-
-    <!-- POPIA & PRIVACY -->
-    <main x-show="page === 'popia'" class="page-enter pt-32 px-6 pb-20">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-12">
-                <div class="inline-block border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 rounded-full text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-6">
-                    Protection of Personal Information Act 4 of 2013
-                </div>
-                <h2 class="text-4xl md:text-5xl font-black text-white mb-4 uppercase italic">POPIA &amp; <span class="gradient-text">Privacy Policy</span></h2>
-                <p class="text-slate-400 text-sm max-w-xl mx-auto">Blink Pay (Pty) Ltd is committed to protecting your personal information in accordance with POPIA. This policy was last updated on <span class="text-white font-bold">1 April 2026</span>.</p>
-            </div>
-
-            <div class="space-y-6">
-
-                <!-- Information Officer -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl border-l-4 border-cyan-500">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">1. Information Officer</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-4">In terms of Section 55 of POPIA, Blink Pay has designated an Information Officer responsible for ensuring compliance with this Act.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div class="bg-slate-900/50 rounded-xl p-4">
-                            <p class="text-slate-500 uppercase font-bold mb-1">Company</p>
-                            <p class="text-white">Blink Pay (Pty) Ltd</p>
-                        </div>
-                        <div class="bg-slate-900/50 rounded-xl p-4">
-                            <p class="text-slate-500 uppercase font-bold mb-1">Registration</p>
-                            <p class="text-white">Pretoria, Gauteng, South Africa</p>
-                        </div>
-                        <div class="bg-slate-900/50 rounded-xl p-4">
-                            <p class="text-slate-500 uppercase font-bold mb-1">Privacy Email</p>
-                            <p class="text-cyan-400">privacy@blinkpay.co.za</p>
-                        </div>
-                        <div class="bg-slate-900/50 rounded-xl p-4">
-                            <p class="text-slate-500 uppercase font-bold mb-1">General Contact</p>
-                            <p class="text-cyan-400">contactus@blinkpay.co.za</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- What We Collect -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">2. Personal Information We Collect</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-4">We collect only the minimum personal information necessary to provide our services (principle of minimality under Section 10 of POPIA):</p>
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3 text-xs text-slate-400">
-                            <span class="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Merchant Onboarding:</span> Full name, business/spaza name, phone number, city or township.</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-xs text-slate-400">
-                            <span class="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Transaction Data:</span> Payment amounts, timestamps, and merchant/payer identifiers required for settlement and reconciliation.</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-xs text-slate-400">
-                            <span class="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Technical Data:</span> Device type, IP address, and app usage analytics to maintain platform security and performance.</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-xs text-slate-400">
-                            <span class="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">We do NOT collect:</span> Customer banking credentials, card numbers, PINs, or passwords. These remain entirely within your banking app.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Purpose of Collection -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">3. Purpose of Collection</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-4">We collect personal information for specific, defined, and lawful purposes (Section 13 of POPIA — Purpose Specification):</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-400">
-                        <div class="bg-slate-900/40 rounded-xl p-4">To onboard and verify merchants on the Blink Pay network.</div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">To process, settle, and reconcile Instant EFT payments.</div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">To communicate service updates, onboarding status, and support via WhatsApp or email.</div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">To comply with FICA, SARB, and other applicable South African financial regulations.</div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">To detect and prevent fraud, money laundering, and unauthorised access.</div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">To improve our platform and services through anonymised analytics.</div>
-                    </div>
-                </div>
-
-                <!-- Data Sharing -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">4. Third-Party Sharing</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-4">We share personal information only where strictly necessary to deliver our service or comply with the law. We never sell personal data to third parties.</p>
-                    <div class="space-y-3 text-xs">
-                        <div class="flex items-start gap-3 text-slate-400">
-                            <span class="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">BankservAfrica:</span> Transaction routing data shared via their Immediate Payment (ImPay) rails for settlement processing. BankservAfrica is itself a regulated entity under SARB.</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-slate-400">
-                            <span class="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Participating Banks:</span> Minimum data necessary to complete inter-bank EFT instructions (e.g., account number, branch code, amount).</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-slate-400">
-                            <span class="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Law Enforcement / Regulators:</span> When required by law, court order, or SARB/FSCA/FIC directive.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Retention -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">5. Data Retention</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-4">We retain personal information only for as long as necessary to fulfil the purposes stated above, or as required by law (Section 14 of POPIA — Retention Limitation).</p>
-                    <div class="space-y-3 text-xs">
-                        <div class="flex items-start gap-3 text-slate-400">
-                            <span class="w-2 h-2 bg-yellow-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Transaction Records:</span> Minimum 5 years as required by FICA (Financial Intelligence Centre Act).</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-slate-400">
-                            <span class="w-2 h-2 bg-yellow-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Merchant Onboarding Data:</span> Duration of active account plus 5 years after account closure.</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-slate-400">
-                            <span class="w-2 h-2 bg-yellow-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Marketing Contact Information:</span> Until you withdraw consent or unsubscribe, whichever is earlier.</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-slate-400">
-                            <span class="w-2 h-2 bg-yellow-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                            <span><span class="text-white font-bold">Technical / Log Data:</span> 90 days for security monitoring purposes.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Your Rights -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl border-l-4 border-magenta-500">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">6. Your Rights as a Data Subject</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-5">Under POPIA (Part 3 of Chapter 2), you have the following rights regarding your personal information held by Blink Pay:</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div class="bg-slate-900/40 rounded-xl p-4">
-                            <p class="text-white font-bold mb-1">Right of Access</p>
-                            <p class="text-slate-400">Request a copy of all personal information we hold about you.</p>
-                        </div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">
-                            <p class="text-white font-bold mb-1">Right to Correction</p>
-                            <p class="text-slate-400">Request that inaccurate or incomplete information be corrected or updated.</p>
-                        </div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">
-                            <p class="text-white font-bold mb-1">Right to Deletion</p>
-                            <p class="text-slate-400">Request deletion of your personal information, subject to legal retention obligations.</p>
-                        </div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">
-                            <p class="text-white font-bold mb-1">Right to Object</p>
-                            <p class="text-slate-400">Object to the processing of your personal information for direct marketing or other purposes.</p>
-                        </div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">
-                            <p class="text-white font-bold mb-1">Right to Withdraw Consent</p>
-                            <p class="text-slate-400">Withdraw consent at any time where processing is based on your consent. Withdrawal does not affect prior processing.</p>
-                        </div>
-                        <div class="bg-slate-900/40 rounded-xl p-4">
-                            <p class="text-white font-bold mb-1">Right to Complain</p>
-                            <p class="text-slate-400">Lodge a complaint with the Information Regulator of South Africa if you believe your rights have been violated.</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-5">To exercise any of the above rights, contact our Information Officer at <span class="text-cyan-400">privacy@blinkpay.co.za</span>. We will respond within <span class="text-white font-bold">30 days</span> of receiving your request.</p>
-                </div>
-
-                <!-- Security -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">7. Security Safeguards</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-4">We implement appropriate technical and organisational measures to protect personal information against loss, theft, and unauthorised access (Section 19 of POPIA):</p>
-                    <div class="space-y-2 text-xs text-slate-400">
-                        <div class="flex items-start gap-3"><span class="text-cyan-400 font-bold">&#x2713;</span><span>256-bit TLS encryption for all data in transit.</span></div>
-                        <div class="flex items-start gap-3"><span class="text-cyan-400 font-bold">&#x2713;</span><span>Encrypted storage for personal information at rest.</span></div>
-                        <div class="flex items-start gap-3"><span class="text-cyan-400 font-bold">&#x2713;</span><span>Role-based access controls limiting employee access to personal data.</span></div>
-                        <div class="flex items-start gap-3"><span class="text-cyan-400 font-bold">&#x2713;</span><span>Regular security assessments and penetration testing.</span></div>
-                        <div class="flex items-start gap-3"><span class="text-cyan-400 font-bold">&#x2713;</span><span>Incident response plan in place; data breaches reported to the Information Regulator within 72 hours where required.</span></div>
-                    </div>
-                </div>
-
-                <!-- Complaints -->
-                <div class="glass p-8 rounded-3xl border-white/5 shadow-xl bg-slate-900/30">
-                    <h3 class="text-lg font-black text-white uppercase mb-3">8. Complaints to the Information Regulator</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-4">If you are not satisfied with our response to a privacy complaint, you have the right to escalate to the Information Regulator of South Africa:</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                        <div class="bg-slate-900/50 rounded-xl p-4">
-                            <p class="text-slate-500 uppercase font-bold mb-1">Website</p>
-                            <p class="text-cyan-400">inforeg.org.za</p>
-                        </div>
-                        <div class="bg-slate-900/50 rounded-xl p-4">
-                            <p class="text-slate-500 uppercase font-bold mb-1">Email</p>
-                            <p class="text-cyan-400">inforeg@justice.gov.za</p>
-                        </div>
-                        <div class="bg-slate-900/50 rounded-xl p-4">
-                            <p class="text-slate-500 uppercase font-bold mb-1">Physical Address</p>
-                            <p class="text-white">JD House, 27 Stiemens St, Braamfontein, Johannesburg</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Policy Updates -->
-                <div class="text-center py-4">
-                    <p class="text-xs text-slate-600">This Privacy Policy may be updated to reflect changes in our practices or applicable law. The current version will always be available on this page. Continued use of our services after any update constitutes acceptance of the revised policy.</p>
-                </div>
-
-            </div>
-        </div>
-    </main>
-
-    <!-- JOIN NETWORK / CONTACT -->
-    <main x-show="page === 'contact'" class="page-enter pt-32 px-6 pb-20">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl md:text-5xl font-black text-white mb-4 uppercase italic">Join the <span class="gradient-text">Network.</span></h2>
-                <p class="text-slate-400">Sign up for early access. Zero hardware costs. Setup takes 5 minutes.</p>
-            </div>
-
-            <div class="glass p-8 md:p-12 rounded-[3rem] border-cyan-500/20 shadow-2xl">
-                <form x-show="!formSent" @submit.prevent="if(popiConsent){ formSent = true }" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Full Name</label>
-                            <input type="text" required class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Business / Spaza Name</label>
-                            <input type="text" required class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Phone Number</label>
-                            <input type="tel" required class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Location (City/Township)</label>
-                            <input type="text" required class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition">
-                        </div>
-                    </div>
-
-                    <!-- POPIA Consent -->
-                    <div class="bg-slate-900/50 border border-white/5 rounded-2xl p-5">
-                        <label class="flex items-start gap-3 cursor-pointer group">
-                            <input type="checkbox" x-model="popiConsent" required class="mt-0.5 w-5 h-5 rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-slate-900 flex-shrink-0">
-                            <span class="text-xs text-slate-400 leading-relaxed">
-                                I consent to Blink Pay (Pty) Ltd collecting and processing my personal information (name, business name, phone number, location) for the purpose of merchant onboarding and service communication, as described in the <button type="button" @click="page = 'popia'" class="text-cyan-400 underline hover:text-white transition">POPIA &amp; Privacy Policy</button>. I understand I may withdraw this consent at any time by contacting <span class="text-cyan-400">privacy@blinkpay.co.za</span>.
-                            </span>
-                        </label>
-                        <p x-show="!popiConsent" x-cloak class="text-[10px] text-red-400 mt-2 ml-8">You must provide consent before submitting this form (POPIA requirement).</p>
-                    </div>
-
-                    <button type="submit" :disabled="!popiConsent" :class="popiConsent ? 'opacity-100 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]' : 'opacity-40 cursor-not-allowed'" class="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 py-4 rounded-xl text-white font-black uppercase text-xs tracking-widest transition duration-300 mt-4">Secure My Spot</button>
-                    <p class="text-center text-[10px] text-slate-500 mt-4 uppercase">No credit check required. Your data is protected under POPIA.</p>
-                </form>
-
-                <div x-show="formSent" x-cloak class="text-center py-16">
-                    <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <h3 class="text-2xl font-black text-white italic mb-2">Welcome to Blink Pay.</h3>
-                    <p class="text-slate-400 text-sm">Your application is in the queue. Our onboarding team will WhatsApp you shortly with your digital QR kit.</p>
-                    <p class="text-xs text-slate-600 mt-4 max-w-sm mx-auto">Your information is held securely in accordance with POPIA. You may request access or deletion at any time by emailing privacy@blinkpay.co.za.</p>
-                    <button @click="page = 'home'; formSent = false; popiConsent = false" class="mt-8 text-[10px] font-bold text-cyan-400 uppercase tracking-widest hover:text-white transition">Return Home</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- INVESTORS -->
-    <main x-show="page === 'investors'" class="page-enter pt-32 px-6 pb-20">
-        <div class="max-w-3xl mx-auto glass p-10 md:p-16 rounded-[4rem] text-center border-magenta-500/20 shadow-[0_0_40px_rgba(217,70,239,0.05)]">
-            <h2 class="text-3xl md:text-4xl font-black text-white mb-4 uppercase italic">Seed Round: R5,000,000</h2>
-            <p class="text-slate-400 text-sm mb-12">Building the direct payment standard for South Africa's main street.</p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
-                <div class="p-6 bg-slate-900/50 rounded-2xl border border-white/5"><p class="text-white font-black text-xl">45%</p><p class="text-[9px] text-slate-500 uppercase font-bold mt-1">Tech / API</p></div>
-                <div class="p-6 bg-slate-900/50 rounded-2xl border border-white/5"><p class="text-white font-black text-xl">35%</p><p class="text-[9px] text-slate-500 uppercase font-bold mt-1">Merchant Growth</p></div>
-                <div class="p-6 bg-slate-900/50 rounded-2xl border border-white/5"><p class="text-white font-black text-xl">20%</p><p class="text-[9px] text-slate-500 uppercase font-bold mt-1">Legal / Compliance</p></div>
-            </div>
-
-            <a href="mailto:invest@blinkpay.co.za" class="inline-block bg-white text-slate-950 px-10 py-4 rounded-full font-black uppercase text-xs tracking-widest hover:bg-magenta-400 hover:text-white transition duration-300">Request Pitch Deck</a>
-        </div>
-    </main>
-
-    <!-- TRUST BADGES -->
-    <section class="py-12 border-y border-white/5 mt-10">
-        <div class="max-w-7xl mx-auto px-6 flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-30 grayscale hover:grayscale-0 transition duration-500">
-            <span class="text-white font-black uppercase italic tracking-tighter text-lg md:text-xl">BankservAfrica</span>
-            <span class="text-white font-black uppercase italic tracking-tighter text-lg md:text-xl">FSCA Aware</span>
-            <span class="text-white font-black uppercase italic tracking-tighter text-lg md:text-xl">Instant EFT</span>
-            <span class="text-white font-black uppercase italic tracking-tighter text-lg md:text-xl">POPIA Compliant</span>
-            <span class="text-white font-black uppercase italic tracking-tighter text-lg md:text-xl">FICA Aligned</span>
+            <p class="mt-10 text-xs text-zinc-600 uppercase tracking-widest">
+                POPIA Compliant &bull; SARB Aligned &bull; BankservAfrica Rails &bull; FSCA Aware
+            </p>
         </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="py-16 px-6 text-center">
-        <img src="logo.png" alt="Blink Pay Logo" class="h-8 mx-auto mb-6 opacity-30 grayscale hover:grayscale-0 transition duration-300">
+    <!-- Features strip -->
+    <section class="px-6 py-20 border-y" style="background:rgba(20,20,23,0.5);border-color:#27272A;">
+        <div class="max-w-screen-lg mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
+                    Everything you need to <span class="gradient-text">move money fast</span>
+                </h2>
+                <p class="text-zinc-400 max-w-md mx-auto">Three powerful ways to handle payments — no hardware, no lag.</p>
+            </div>
 
-        <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-8">
-            <button @click="page = 'popia'" class="text-[10px] text-slate-500 hover:text-cyan-400 uppercase tracking-widest transition">POPIA &amp; Privacy Policy</button>
-            <span class="text-slate-700 text-[10px]">&bull;</span>
-            <button @click="page = 'contact'" class="text-[10px] text-slate-500 hover:text-cyan-400 uppercase tracking-widest transition">Join Network</button>
-            <span class="text-slate-700 text-[10px]">&bull;</span>
-            <button @click="page = 'about'" class="text-[10px] text-slate-500 hover:text-cyan-400 uppercase tracking-widest transition">About Us</button>
-            <span class="text-slate-700 text-[10px]">&bull;</span>
-            <a href="mailto:contactus@blinkpay.co.za" class="text-[10px] text-slate-500 hover:text-cyan-400 uppercase tracking-widest transition">contactus@blinkpay.co.za</a>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card p-6">
+                    <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                         style="background:rgba(0,212,184,0.1);">
+                        <svg class="w-5 h-5" style="color:#00D4B8;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-white text-lg mb-2">Instant Pay</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">Send money directly via QR code or Instant EFT. Transfers settle in seconds, not days.</p>
+                </div>
+                <div class="card p-6">
+                    <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                         style="background:rgba(255,45,120,0.1);">
+                        <svg class="w-5 h-5" style="color:#FF2D78;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-white text-lg mb-2">Split Pay</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">Divide any expense fairly among a group. Add people, set amounts, done.</p>
+                </div>
+                <div class="card p-6">
+                    <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                         style="background:rgba(155,109,255,0.1);">
+                        <svg class="w-5 h-5" style="color:#9B6DFF;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-white text-lg mb-2">Settle Up</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">See exactly who owes what and clear balances with a single tap.</p>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <p class="text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] italic mb-2">© 2026 Blink Pay (Pty) Ltd.</p>
-        <p class="text-slate-700 text-[9px] font-medium uppercase tracking-widest mb-3">Pretoria, Gauteng, South Africa.</p>
-        <p class="text-slate-800 text-[9px] max-w-xl mx-auto leading-relaxed">Blink Pay (Pty) Ltd is a South African registered company. Payments are processed via BankservAfrica's regulated Instant EFT infrastructure. Blink Pay does not hold client funds. This website and its services are subject to the laws of the Republic of South Africa, including POPIA, FICA, and the National Payment System Act.</p>
+    <!-- Bottom CTA -->
+    <section class="px-6 py-24 text-center">
+        <div class="max-w-xl mx-auto">
+            <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+                Ready to <span class="gradient-text">blink?</span>
+            </h2>
+            <p class="text-zinc-400 mb-8">Join early access and start accepting payments the smart way.</p>
+            <button @click="page='contact'"
+                    class="text-sm font-semibold px-10 py-3 rounded-lg cursor-pointer transition-all"
+                    style="background:#00D4B8;color:#09090B;box-shadow:0 4px 24px rgba(0,212,184,0.25);"
+                    onmouseover="this.style.background='#00BFA5'" onmouseout="this.style.background='#00D4B8'">
+                Get Early Access — It's Free
+            </button>
+        </div>
+    </section>
+
+    <!-- Trust bar -->
+    <div class="border-t border-b px-6 py-6" style="border-color:#27272A;">
+        <div class="max-w-screen-lg mx-auto flex flex-wrap justify-center items-center gap-8 md:gap-14"
+             style="opacity:0.25;filter:grayscale(1);"
+             onmouseover="this.style.opacity='0.6';this.style.filter='grayscale(0)'"
+             onmouseout="this.style.opacity='0.25';this.style.filter='grayscale(1)'"
+             >
+            <span class="text-white font-bold uppercase tracking-tighter text-base">BankservAfrica</span>
+            <span class="text-white font-bold uppercase tracking-tighter text-base">FSCA Aware</span>
+            <span class="text-white font-bold uppercase tracking-tighter text-base">Instant EFT</span>
+            <span class="text-white font-bold uppercase tracking-tighter text-base">POPIA Compliant</span>
+            <span class="text-white font-bold uppercase tracking-tighter text-base">FICA Aligned</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="px-6 py-10 text-center border-t" style="border-color:#27272A;">
+        <img src="logo.png" alt="Blink Pay" class="h-7 mx-auto mb-5 opacity-20">
+        <div class="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6 text-xs text-zinc-500">
+            <button @click="page='popia'" class="hover:text-zinc-300 transition-colors bg-transparent border-0 cursor-pointer">POPIA &amp; Privacy</button>
+            <span>·</span>
+            <button @click="page='contact'" class="hover:text-zinc-300 transition-colors bg-transparent border-0 cursor-pointer">Join Network</button>
+            <span>·</span>
+            <button @click="page='about'" class="hover:text-zinc-300 transition-colors bg-transparent border-0 cursor-pointer">About Us</button>
+            <span>·</span>
+            <a href="mailto:contactus@blinkpay.co.za" class="hover:text-zinc-300 transition-colors" style="text-decoration:none;color:inherit;">contactus@blinkpay.co.za</a>
+        </div>
+        <p class="text-zinc-600 text-xs">© 2026 Blink Pay (Pty) Ltd. Pretoria, Gauteng, South Africa.</p>
+        <p class="text-zinc-700 text-xs mt-2 max-w-xl mx-auto leading-relaxed">
+            Payments processed via BankservAfrica's regulated Instant EFT infrastructure. Blink Pay does not hold client funds.
+            Subject to POPIA, FICA, and the National Payment System Act.
+        </p>
     </footer>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ ABOUT -->
+<main x-show="page==='about'" x-cloak class="page-enter">
+    <section class="relative px-6 pt-24 pb-20 text-center overflow-hidden">
+        <div class="pointer-events-none absolute inset-0 overflow-hidden">
+            <div class="blob-purple absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full blur-[100px]"></div>
+        </div>
+        <div class="relative z-10 max-w-2xl mx-auto">
+            <p class="text-sm font-medium uppercase tracking-widest mb-4" style="color:#00D4B8;">Our story</p>
+            <h1 class="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+                Built for <span class="gradient-text">Mzansi.</span>
+            </h1>
+            <p class="text-lg text-zinc-400 leading-relaxed">
+                Headquartered in Pretoria, Blink Pay is engineered specifically for the realities of the South African economy — where smartphones are universal but card machines are not.
+            </p>
+        </div>
+    </section>
+
+    <section class="px-6 py-16" style="background:rgba(20,20,23,0.5);">
+        <div class="max-w-screen-lg mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="card p-7">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(0,212,184,0.1);">
+                    <svg class="w-5 h-5" style="color:#00D4B8;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-white text-lg mb-3">Our Mission</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed">For decades, traditional banks have ignored the informal sector, imposing high hardware costs and monthly rental fees that excluded spaza shops, street vendors, and independent mechanics. Our mission is to democratise digital commerce using the technology everyone already has: the smartphone.</p>
+            </div>
+            <div class="card p-7">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(255,45,120,0.1);">
+                    <svg class="w-5 h-5" style="color:#FF2D78;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-white text-lg mb-3">The Innovation</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed">By pivoting away from expensive NFC/card tapping and embracing Instant EFT and Dynamic QR codes, we bypass the legacy 3.5% interchange fees — passing those savings directly to merchants, empowering them to grow safely without the risk of holding cash.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="px-6 py-16">
+        <div class="max-w-screen-lg mx-auto">
+            <h2 class="text-2xl font-bold text-white mb-8">Regulatory Commitment</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="card p-5 flex items-start gap-4">
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(0,212,184,0.1);">
+                        <svg class="w-4 h-4" style="color:#00D4B8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-white font-semibold text-sm mb-1">POPIA Compliant</p>
+                        <p class="text-zinc-400 text-xs leading-relaxed">Designated Information Officer, documented data handling, full compliance with the Protection of Personal Information Act 4 of 2013.</p>
+                    </div>
+                </div>
+                <div class="card p-5 flex items-start gap-4">
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(75,123,255,0.1);">
+                        <svg class="w-4 h-4" style="color:#4B7BFF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-white font-semibold text-sm mb-1">SARB Aligned</p>
+                        <p class="text-zinc-400 text-xs leading-relaxed">All payment flows operate within the South African Reserve Bank's National Payment System framework and Instant EFT guidelines.</p>
+                    </div>
+                </div>
+                <div class="card p-5 flex items-start gap-4">
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(155,109,255,0.1);">
+                        <svg class="w-4 h-4" style="color:#9B6DFF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-white font-semibold text-sm mb-1">FICA Aware</p>
+                        <p class="text-zinc-400 text-xs leading-relaxed">Merchant onboarding follows Financial Intelligence Centre Act requirements for identity verification and transaction monitoring.</p>
+                    </div>
+                </div>
+                <div class="card p-5 flex items-start gap-4">
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(0,212,184,0.1);">
+                        <svg class="w-4 h-4" style="color:#00D4B8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-white font-semibold text-sm mb-1">BankservAfrica Rails</p>
+                        <p class="text-zinc-400 text-xs leading-relaxed">Transactions route through BankservAfrica's regulated Immediate Payment (ImPay) infrastructure — the same rails used by South Africa's major banks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team -->
+    <section class="px-6 py-16 border-t" style="border-color:#27272A;">
+        <div class="max-w-screen-lg mx-auto text-center">
+            <h2 class="text-2xl font-bold text-white mb-2">The Team</h2>
+            <p class="text-zinc-400 text-sm mb-12">The people building Blink Pay.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-10">
+                <div class="flex flex-col items-center gap-3">
+                    <div class="w-20 h-20 rounded-2xl card flex items-center justify-center text-3xl">👤</div>
+                    <div class="font-semibold text-white">Mohamed Asmall</div>
+                    <div class="text-sm text-zinc-400">Co-founder &amp; CEO</div>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <div class="w-20 h-20 rounded-2xl card flex items-center justify-center text-3xl">👤</div>
+                    <div class="font-semibold text-white">Ammaar Peerbhai</div>
+                    <div class="text-sm text-zinc-400">Co-founder &amp; CTO</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="px-6 py-8 text-center border-t text-sm text-zinc-500" style="border-color:#27272A;">
+        © 2026 Blink Pay (Pty) Ltd. &nbsp;·&nbsp;
+        <a href="mailto:contactus@blinkpay.co.za" style="color:#00D4B8;text-decoration:none;">contactus@blinkpay.co.za</a>
+    </footer>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ PRODUCT -->
+<main x-show="page==='solutions'" x-cloak class="page-enter">
+    <section class="relative px-6 pt-24 pb-16 overflow-hidden">
+        <div class="blob-teal pointer-events-none absolute top-0 right-0 w-[500px] h-[400px] rounded-full blur-[120px]"></div>
+        <div class="max-w-screen-lg mx-auto relative z-10">
+            <p class="text-sm font-medium uppercase tracking-widest mb-4" style="color:#00D4B8;">How it works</p>
+            <h1 class="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-4">
+                Pure <span class="gradient-text">Rails.</span>
+            </h1>
+            <p class="text-lg text-zinc-400 max-w-xl leading-relaxed">
+                By removing card hardware and banking lag, we've built the fastest path for money to move from customer to merchant.
+            </p>
+        </div>
+    </section>
+
+    <!-- Steps -->
+    <section class="px-6 pb-16">
+        <div class="max-w-screen-lg mx-auto grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="card p-6 border-t-2" style="border-top-color:#00D4B8;">
+                <span class="text-4xl font-bold mb-4 block" style="color:rgba(255,255,255,0.05);">01</span>
+                <h4 class="text-white font-semibold mb-2">Scan QR</h4>
+                <p class="text-xs text-zinc-400 leading-relaxed">Customer scans the dynamic QR code on the merchant's phone or counter.</p>
+            </div>
+            <div class="card p-6 border-t-2" style="border-top-color:#4B7BFF;">
+                <span class="text-4xl font-bold mb-4 block" style="color:rgba(255,255,255,0.05);">02</span>
+                <h4 class="text-white font-semibold mb-2">Authenticate</h4>
+                <p class="text-xs text-zinc-400 leading-relaxed">Customer approves the payment via their existing, trusted banking app.</p>
+            </div>
+            <div class="card p-6 border-t-2" style="border-top-color:#9B6DFF;">
+                <span class="text-4xl font-bold mb-4 block" style="color:rgba(255,255,255,0.05);">03</span>
+                <h4 class="text-white font-semibold mb-2">Instant EFT</h4>
+                <p class="text-xs text-zinc-400 leading-relaxed">Funds move directly via secure, real-time Instant EFT infrastructure.</p>
+            </div>
+            <div class="card p-6 border-t-2" style="border-top-color:#FF2D78;">
+                <span class="text-4xl font-bold mb-4 block" style="color:rgba(255,255,255,0.05);">04</span>
+                <h4 class="text-white font-semibold mb-2">Settlement</h4>
+                <p class="text-xs text-zinc-400 leading-relaxed">Merchant receives instant confirmation and immediate access to working capital.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison table -->
+    <section class="px-6 pb-20 border-t" style="border-color:#27272A;">
+        <div class="max-w-screen-lg mx-auto pt-16">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-white mb-2">Why Merchants Switch</h2>
+                <p class="text-zinc-400 text-sm">The math is simple. Stop paying banks for the privilege of running your business.</p>
+            </div>
+            <div class="card overflow-hidden max-w-3xl mx-auto">
+                <table class="w-full compare-table text-sm">
+                    <thead>
+                        <tr style="background:rgba(9,9,11,0.6);">
+                            <th class="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Feature</th>
+                            <th class="text-zinc-400 text-xs font-semibold uppercase tracking-wider border-l" style="border-color:#27272A;">Traditional POS</th>
+                            <th class="text-xs font-semibold uppercase tracking-wider border-l" style="border-color:rgba(0,212,184,0.3);color:#00D4B8;background:rgba(0,212,184,0.03);">Blink Pay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold text-white">Transaction Fee</td>
+                            <td class="text-zinc-400 border-l" style="border-color:#27272A;">Up to 3.5%</td>
+                            <td class="font-bold text-white border-l" style="border-color:rgba(0,212,184,0.3);background:rgba(0,212,184,0.03);">1.0% Flat</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-white">Monthly Rental</td>
+                            <td class="text-zinc-400 border-l" style="border-color:#27272A;">R350 – R500/month</td>
+                            <td class="font-bold text-white border-l" style="border-color:rgba(0,212,184,0.3);background:rgba(0,212,184,0.03);">R0 (Free App)</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-white">Hardware Required</td>
+                            <td class="text-zinc-400 border-l" style="border-color:#27272A;">Card machine / SIM</td>
+                            <td class="font-bold text-white border-l" style="border-color:rgba(0,212,184,0.3);background:rgba(0,212,184,0.03);">Just a smartphone</td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td class="font-semibold text-white">Settlement Speed</td>
+                            <td class="text-zinc-400 border-l" style="border-color:#27272A;">24 – 48 hours</td>
+                            <td class="font-bold border-l" style="color:#00D4B8;border-color:rgba(0,212,184,0.3);background:rgba(0,212,184,0.03);">Instant (&lt;10s)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="px-6 pb-20" x-data="{ open: null }">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-2xl font-bold text-white mb-8 text-center">Frequently Asked Questions</h2>
+            <div class="space-y-3">
+                <template x-for="(faq, i) in [
+                    { q: 'Do I need a special bank account?', a: 'No. Blink Pay settles directly into your existing South African bank account (Capitec, FNB, Standard Bank, Nedbank, etc.). No new account required.' },
+                    { q: 'What if my customer doesn\'t have data?', a: 'Many major banking apps are zero-rated by telecom providers. Additionally, merchants can sell Blink Pay Airtime/Data vouchers directly from the merchant dashboard.' },
+                    { q: 'Is it safe from fraud?', a: 'Yes. Customers authenticate using their own banking app (fingerprint or face ID), virtually eliminating chargebacks and card-skimming fraud. Blink Pay uses bank-grade encryption throughout.' },
+                    { q: 'What personal information does Blink Pay collect?', a: 'For merchant onboarding: full name, business name, phone number, and general location. We never store customer banking credentials. See our POPIA page for full details.' },
+                    { q: 'Can I request deletion of my data?', a: 'Yes. Under POPIA you have the right to access, correct, or delete your personal information. Email privacy@blinkpay.co.za. Note: transaction records are retained for 5 years under FICA.' }
+                ]" :key="i">
+                    <div class="card overflow-hidden">
+                        <button @click="open = open === i ? null : i"
+                                class="w-full px-5 py-4 text-left flex justify-between items-center bg-transparent border-0 cursor-pointer">
+                            <span class="font-semibold text-white text-sm" x-text="faq.q"></span>
+                            <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                                 :class="open === i ? 'rotate-180' : ''"
+                                 style="color:#00D4B8;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div x-show="open === i" x-cloak class="px-5 pb-4 text-xs text-zinc-400 leading-relaxed" x-text="faq.a"></div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <footer class="px-6 py-8 text-center border-t text-sm text-zinc-500" style="border-color:#27272A;">
+        © 2026 Blink Pay (Pty) Ltd. &nbsp;·&nbsp;
+        <a href="mailto:contactus@blinkpay.co.za" style="color:#00D4B8;text-decoration:none;">contactus@blinkpay.co.za</a>
+    </footer>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ MARKET DATA -->
+<main x-show="page==='market'" x-cloak class="page-enter">
+    <section class="relative px-6 pt-24 pb-16 text-center overflow-hidden">
+        <div class="blob-teal pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full blur-[120px]"></div>
+        <div class="relative z-10 max-w-2xl mx-auto">
+            <p class="text-sm font-medium uppercase tracking-widest mb-4" style="color:#00D4B8;">Market opportunity</p>
+            <h1 class="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-4">
+                The Opportunity <span class="gradient-text">in Numbers.</span>
+            </h1>
+            <p class="text-lg text-zinc-400">South Africa's informal economy is one of the world's most underserved fintech markets.</p>
+        </div>
+    </section>
+
+    <section class="px-6 pb-16">
+        <div class="max-w-screen-lg mx-auto grid grid-cols-2 md:grid-cols-4 gap-5">
+            <div class="card p-7 text-center border-b-2" style="border-bottom-color:#00D4B8;">
+                <p class="text-4xl sm:text-5xl font-bold text-white mb-2">R1.1T</p>
+                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Informal Economy TAM</p>
+            </div>
+            <div class="card p-7 text-center border-b-2" style="border-bottom-color:#FF2D78;">
+                <p class="text-4xl sm:text-5xl font-bold text-white mb-2">79%</p>
+                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Smartphone Penetration</p>
+            </div>
+            <div class="card p-7 text-center border-b-2" style="border-bottom-color:#9B6DFF;">
+                <p class="text-4xl sm:text-5xl font-bold text-white mb-2">1%</p>
+                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Blink Pay Flat Fee</p>
+            </div>
+            <div class="card p-7 text-center border-b-2" style="border-bottom-color:#4B7BFF;">
+                <p class="text-4xl sm:text-5xl font-bold text-white mb-2">&lt;10s</p>
+                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">EFT Settlement Speed</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="px-6 pb-20">
+        <div class="max-w-3xl mx-auto card p-8 md:p-10">
+            <h3 class="text-2xl font-bold text-white mb-4">Why Instant EFT is Winning</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-5">Traditional POS hardware is too expensive for a fruit vendor or small spaza. Card interchange fees (averaging 3.5%) eat directly into profits. However, with 79% of South Africans using smartphones, banking apps are universally accessible.</p>
+            <p class="text-zinc-400 text-sm leading-relaxed">Blink Pay leverages this. By replacing hardware with a simple QR code and routing payments through Instant EFT rails, we collapse the cost structure — making digital payments cheaper and safer than handling cash.</p>
+        </div>
+    </section>
+
+    <footer class="px-6 py-8 text-center border-t text-sm text-zinc-500" style="border-color:#27272A;">
+        © 2026 Blink Pay (Pty) Ltd. &nbsp;·&nbsp;
+        <a href="mailto:contactus@blinkpay.co.za" style="color:#00D4B8;text-decoration:none;">contactus@blinkpay.co.za</a>
+    </footer>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ POPIA -->
+<main x-show="page==='popia'" x-cloak class="page-enter">
+    <section class="px-6 pt-20 pb-10 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-medium mb-6"
+             style="border-color:rgba(0,212,184,0.3);background:rgba(0,212,184,0.05);color:#00D4B8;">
+            Protection of Personal Information Act 4 of 2013
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
+            POPIA &amp; <span class="gradient-text">Privacy Policy</span>
+        </h1>
+        <p class="text-zinc-400 text-sm max-w-lg mx-auto">
+            Blink Pay (Pty) Ltd is committed to protecting your personal information in accordance with POPIA.
+            Last updated <span class="text-white font-semibold">1 April 2026</span>.
+        </p>
+    </section>
+
+    <section class="px-6 pb-20">
+        <div class="max-w-3xl mx-auto space-y-5">
+
+            <!-- 1 -->
+            <div class="card p-7 border-l-4" style="border-left-color:#00D4B8;">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">1. Information Officer</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-5">In terms of Section 55 of POPIA, Blink Pay has designated an Information Officer responsible for ensuring compliance with this Act.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-zinc-500 font-semibold uppercase mb-1">Company</p>
+                        <p class="text-white">Blink Pay (Pty) Ltd</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-zinc-500 font-semibold uppercase mb-1">Registration</p>
+                        <p class="text-white">Pretoria, Gauteng, South Africa</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-zinc-500 font-semibold uppercase mb-1">Privacy Email</p>
+                        <p style="color:#00D4B8;">privacy@blinkpay.co.za</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-zinc-500 font-semibold uppercase mb-1">General Contact</p>
+                        <p style="color:#00D4B8;">contactus@blinkpay.co.za</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 -->
+            <div class="card p-7">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">2. Personal Information We Collect</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-4">We collect only the minimum personal information necessary (principle of minimality — Section 10 of POPIA):</p>
+                <div class="space-y-2.5">
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#00D4B8;"></span>
+                        <span><span class="text-white font-semibold">Merchant Onboarding:</span> Full name, business/spaza name, phone number, city or township.</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#00D4B8;"></span>
+                        <span><span class="text-white font-semibold">Transaction Data:</span> Payment amounts, timestamps, and merchant/payer identifiers required for settlement and reconciliation.</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#00D4B8;"></span>
+                        <span><span class="text-white font-semibold">Technical Data:</span> Device type, IP address, and app usage analytics to maintain platform security and performance.</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#FF2D78;"></span>
+                        <span><span class="text-white font-semibold">We do NOT collect:</span> Customer banking credentials, card numbers, PINs, or passwords. These remain entirely within your banking app.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="card p-7">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">3. Purpose of Collection</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-4">We collect personal information for specific, defined, and lawful purposes (Section 13 of POPIA — Purpose Specification):</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-zinc-400">
+                    <div class="rounded-lg p-3" style="background:#09090B;">To onboard and verify merchants on the Blink Pay network.</div>
+                    <div class="rounded-lg p-3" style="background:#09090B;">To process, settle, and reconcile Instant EFT payments.</div>
+                    <div class="rounded-lg p-3" style="background:#09090B;">To communicate service updates and onboarding status via WhatsApp or email.</div>
+                    <div class="rounded-lg p-3" style="background:#09090B;">To comply with FICA, SARB, and other applicable South African financial regulations.</div>
+                    <div class="rounded-lg p-3" style="background:#09090B;">To detect and prevent fraud, money laundering, and unauthorised access.</div>
+                    <div class="rounded-lg p-3" style="background:#09090B;">To improve our platform and services through anonymised analytics.</div>
+                </div>
+            </div>
+
+            <!-- 4 -->
+            <div class="card p-7">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">4. Third-Party Sharing</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-4">We share personal information only where strictly necessary to deliver our service or comply with the law. We never sell personal data to third parties.</p>
+                <div class="space-y-2.5">
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#00D4B8;"></span>
+                        <span><span class="text-white font-semibold">BankservAfrica:</span> Transaction routing data shared via their Immediate Payment (ImPay) rails for settlement. BankservAfrica is a regulated entity under SARB.</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#00D4B8;"></span>
+                        <span><span class="text-white font-semibold">Participating Banks:</span> Minimum data necessary to complete inter-bank EFT instructions (account number, branch code, amount).</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#00D4B8;"></span>
+                        <span><span class="text-white font-semibold">Law Enforcement / Regulators:</span> When required by law, court order, or SARB/FSCA/FIC directive.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 -->
+            <div class="card p-7">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">5. Data Retention</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-4">We retain personal information only as long as necessary (Section 14 of POPIA — Retention Limitation):</p>
+                <div class="space-y-2.5">
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#F59E0B;"></span>
+                        <span><span class="text-white font-semibold">Transaction Records:</span> Minimum 5 years as required by FICA.</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#F59E0B;"></span>
+                        <span><span class="text-white font-semibold">Merchant Onboarding Data:</span> Duration of active account plus 5 years after closure.</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#F59E0B;"></span>
+                        <span><span class="text-white font-semibold">Marketing Contact Information:</span> Until you withdraw consent or unsubscribe.</span>
+                    </div>
+                    <div class="flex items-start gap-3 text-xs text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background:#F59E0B;"></span>
+                        <span><span class="text-white font-semibold">Technical / Log Data:</span> 90 days for security monitoring.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6 -->
+            <div class="card p-7 border-l-4" style="border-left-color:#FF2D78;">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">6. Your Rights as a Data Subject</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-5">Under POPIA (Part 3 of Chapter 2) you have the following rights regarding your personal information held by Blink Pay:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-5">
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-white font-semibold mb-1">Right of Access</p>
+                        <p class="text-zinc-400">Request a copy of all personal information we hold about you.</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-white font-semibold mb-1">Right to Correction</p>
+                        <p class="text-zinc-400">Request that inaccurate or incomplete information be corrected.</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-white font-semibold mb-1">Right to Deletion</p>
+                        <p class="text-zinc-400">Request deletion of your personal information, subject to legal retention obligations.</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-white font-semibold mb-1">Right to Object</p>
+                        <p class="text-zinc-400">Object to processing your personal information for direct marketing or other purposes.</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-white font-semibold mb-1">Right to Withdraw Consent</p>
+                        <p class="text-zinc-400">Withdraw consent at any time. Withdrawal does not affect prior processing.</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-white font-semibold mb-1">Right to Complain</p>
+                        <p class="text-zinc-400">Lodge a complaint with the Information Regulator of South Africa.</p>
+                    </div>
+                </div>
+                <p class="text-xs text-zinc-500">
+                    To exercise any right, contact <span style="color:#00D4B8;">privacy@blinkpay.co.za</span>.
+                    We will respond within <span class="text-white font-semibold">30 days</span>.
+                </p>
+            </div>
+
+            <!-- 7 -->
+            <div class="card p-7">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">7. Security Safeguards</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-4">We implement appropriate technical and organisational measures to protect personal information (Section 19 of POPIA):</p>
+                <div class="space-y-2 text-xs text-zinc-400">
+                    <div class="flex items-start gap-3"><span class="font-bold" style="color:#00D4B8;">✓</span><span>256-bit TLS encryption for all data in transit.</span></div>
+                    <div class="flex items-start gap-3"><span class="font-bold" style="color:#00D4B8;">✓</span><span>Encrypted storage for personal information at rest.</span></div>
+                    <div class="flex items-start gap-3"><span class="font-bold" style="color:#00D4B8;">✓</span><span>Role-based access controls limiting employee access to personal data.</span></div>
+                    <div class="flex items-start gap-3"><span class="font-bold" style="color:#00D4B8;">✓</span><span>Regular security assessments and penetration testing.</span></div>
+                    <div class="flex items-start gap-3"><span class="font-bold" style="color:#00D4B8;">✓</span><span>Incident response plan in place; data breaches reported to the Information Regulator within 72 hours where required.</span></div>
+                </div>
+            </div>
+
+            <!-- 8 -->
+            <div class="card p-7">
+                <h3 class="font-bold text-white mb-3 uppercase text-sm tracking-wider">8. Complaints to the Information Regulator</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-4">If unsatisfied with our response, you may escalate to the Information Regulator of South Africa:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-zinc-500 font-semibold uppercase mb-1">Website</p>
+                        <p style="color:#00D4B8;">inforeg.org.za</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-zinc-500 font-semibold uppercase mb-1">Email</p>
+                        <p style="color:#00D4B8;">inforeg@justice.gov.za</p>
+                    </div>
+                    <div class="rounded-lg p-4" style="background:#09090B;">
+                        <p class="text-zinc-500 font-semibold uppercase mb-1">Address</p>
+                        <p class="text-white">JD House, 27 Stiemens St, Braamfontein, Johannesburg</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-xs text-zinc-700 py-4">
+                This Privacy Policy may be updated to reflect changes in our practices or applicable law.
+                Continued use of our services constitutes acceptance of the revised policy.
+            </p>
+        </div>
+    </section>
+
+    <footer class="px-6 py-8 text-center border-t text-sm text-zinc-500" style="border-color:#27272A;">
+        © 2026 Blink Pay (Pty) Ltd. &nbsp;·&nbsp;
+        <a href="mailto:privacy@blinkpay.co.za" style="color:#00D4B8;text-decoration:none;">privacy@blinkpay.co.za</a>
+    </footer>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ JOIN NETWORK -->
+<main x-show="page==='contact'" x-cloak class="page-enter">
+    <section class="relative px-6 pt-24 pb-20 overflow-hidden">
+        <div class="blob-teal pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full blur-[120px]"></div>
+        <div class="max-w-xl mx-auto relative z-10">
+            <div class="text-center mb-10">
+                <p class="text-sm font-medium uppercase tracking-widest mb-4" style="color:#00D4B8;">Early access</p>
+                <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
+                    Join the <span class="gradient-text">Network.</span>
+                </h1>
+                <p class="text-zinc-400">Sign up for early access. Zero hardware costs. Setup takes 5 minutes.</p>
+            </div>
+
+            <div class="card p-7 md:p-9">
+                <!-- Form -->
+                <form x-show="!formSent" @submit.prevent="if(popiConsent){ formSent = true }" class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Full Name</label>
+                            <input type="text" required placeholder="Your full name"
+                                   class="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
+                                   style="background:#09090B;border:1px solid #27272A;"
+                                   onfocus="this.style.borderColor='#00D4B8'" onblur="this.style.borderColor='#27272A'">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Business / Spaza Name</label>
+                            <input type="text" required placeholder="Your business name"
+                                   class="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
+                                   style="background:#09090B;border:1px solid #27272A;"
+                                   onfocus="this.style.borderColor='#00D4B8'" onblur="this.style.borderColor='#27272A'">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Phone Number</label>
+                            <input type="tel" required placeholder="+27 ..."
+                                   class="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
+                                   style="background:#09090B;border:1px solid #27272A;"
+                                   onfocus="this.style.borderColor='#00D4B8'" onblur="this.style.borderColor='#27272A'">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Location</label>
+                            <input type="text" required placeholder="City or township"
+                                   class="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
+                                   style="background:#09090B;border:1px solid #27272A;"
+                                   onfocus="this.style.borderColor='#00D4B8'" onblur="this.style.borderColor='#27272A'">
+                        </div>
+                    </div>
+
+                    <!-- POPIA consent -->
+                    <div class="rounded-lg p-4 border" style="background:#09090B;border-color:#27272A;">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" x-model="popiConsent" required
+                                   class="mt-0.5 w-4 h-4 rounded flex-shrink-0 cursor-pointer"
+                                   style="accent-color:#00D4B8;">
+                            <span class="text-xs text-zinc-400 leading-relaxed">
+                                I consent to Blink Pay (Pty) Ltd collecting and processing my personal information (name, business name, phone number, location) for merchant onboarding and service communication, as described in the
+                                <button type="button" @click="page='popia'" class="underline cursor-pointer bg-transparent border-0 p-0" style="color:#00D4B8;">POPIA &amp; Privacy Policy</button>.
+                                I may withdraw consent at any time by contacting
+                                <span style="color:#00D4B8;">privacy@blinkpay.co.za</span>.
+                            </span>
+                        </label>
+                        <p x-show="!popiConsent" x-cloak class="text-xs mt-2 ml-7" style="color:#FF2D78;">
+                            You must provide consent before submitting (POPIA requirement).
+                        </p>
+                    </div>
+
+                    <button type="submit"
+                            :disabled="!popiConsent"
+                            :class="popiConsent ? 'opacity-100' : 'opacity-40 cursor-not-allowed'"
+                            class="w-full py-3 rounded-lg text-sm font-semibold transition-all"
+                            style="background:#00D4B8;color:#09090B;box-shadow:0 4px 16px rgba(0,212,184,0.2);">
+                        Secure My Spot
+                    </button>
+                    <p class="text-center text-xs text-zinc-600">No credit check required. Your data is protected under POPIA.</p>
+                </form>
+
+                <!-- Success state -->
+                <div x-show="formSent" x-cloak class="text-center py-12">
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style="background:rgba(34,197,94,0.15);">
+                        <svg class="w-7 h-7" style="color:#22C55E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Welcome to Blink Pay.</h3>
+                    <p class="text-zinc-400 text-sm mb-2">Your application is in the queue. Our onboarding team will WhatsApp you shortly with your digital QR kit.</p>
+                    <p class="text-xs text-zinc-600 mb-8 max-w-xs mx-auto">Your information is held securely under POPIA. Request access or deletion anytime at privacy@blinkpay.co.za.</p>
+                    <button @click="page='home';formSent=false;popiConsent=false"
+                            class="text-xs font-semibold uppercase tracking-wider transition-colors bg-transparent border-0 cursor-pointer"
+                            style="color:#00D4B8;">
+                        Return Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="px-6 py-8 text-center border-t text-sm text-zinc-500" style="border-color:#27272A;">
+        © 2026 Blink Pay (Pty) Ltd. &nbsp;·&nbsp;
+        <a href="mailto:contactus@blinkpay.co.za" style="color:#00D4B8;text-decoration:none;">contactus@blinkpay.co.za</a>
+    </footer>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ INVESTORS -->
+<main x-show="page==='investors'" x-cloak class="page-enter">
+    <section class="relative px-6 pt-24 pb-20 overflow-hidden">
+        <div class="blob-pink pointer-events-none absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-[100px]"></div>
+        <div class="blob-purple pointer-events-none absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-[100px]"></div>
+        <div class="max-w-xl mx-auto relative z-10 text-center">
+            <div class="card p-10 md:p-14">
+                <p class="text-sm font-medium uppercase tracking-widest mb-4" style="color:#9B6DFF;">Seed Round</p>
+                <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-3">R5,000,000</h1>
+                <p class="text-zinc-400 text-sm mb-10">Building the direct payment standard for South Africa's main street.</p>
+
+                <div class="grid grid-cols-3 gap-4 mb-10">
+                    <div class="rounded-xl p-5 border" style="background:#09090B;border-color:#27272A;">
+                        <p class="text-white font-bold text-xl mb-1">45%</p>
+                        <p class="text-zinc-500 text-xs font-semibold uppercase">Tech / API</p>
+                    </div>
+                    <div class="rounded-xl p-5 border" style="background:#09090B;border-color:#27272A;">
+                        <p class="text-white font-bold text-xl mb-1">35%</p>
+                        <p class="text-zinc-500 text-xs font-semibold uppercase">Merchant Growth</p>
+                    </div>
+                    <div class="rounded-xl p-5 border" style="background:#09090B;border-color:#27272A;">
+                        <p class="text-white font-bold text-xl mb-1">20%</p>
+                        <p class="text-zinc-500 text-xs font-semibold uppercase">Legal / Compliance</p>
+                    </div>
+                </div>
+
+                <a href="mailto:invest@blinkpay.co.za"
+                   class="inline-block text-sm font-semibold px-8 py-3 rounded-lg transition-all"
+                   style="background:#00D4B8;color:#09090B;box-shadow:0 4px 16px rgba(0,212,184,0.2);text-decoration:none;"
+                   onmouseover="this.style.background='#00BFA5'" onmouseout="this.style.background='#00D4B8'">
+                    Request Pitch Deck
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="px-6 py-8 text-center border-t text-sm text-zinc-500" style="border-color:#27272A;">
+        © 2026 Blink Pay (Pty) Ltd. &nbsp;·&nbsp;
+        <a href="mailto:invest@blinkpay.co.za" style="color:#00D4B8;text-decoration:none;">invest@blinkpay.co.za</a>
+    </footer>
+</main>
 
 </body>
 </html>
