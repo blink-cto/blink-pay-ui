@@ -86,10 +86,17 @@
             content: ""; position: absolute; height: 2px; border-radius: 999px; background: var(--teal); left: 0; right: 0; bottom: -8px;
         }
         .btn-primary {
-            background: var(--teal); color: #09090B; font-weight: 800; border-radius: .85rem; transition: transform .16s ease, background .16s ease, box-shadow .16s ease;
+            background: var(--teal); color: #09090B; font-weight: 800; border-radius: .85rem; transition: transform .16s ease, color .16s ease, box-shadow .16s ease;
             box-shadow: 0 14px 34px rgba(0,212,184,.18);
         }
-        .btn-primary:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: 0 18px 44px rgba(0,212,184,.24); }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #00D4B8 0%, #4B7BFF 25%, #9B6DFF 50%, #FF2D78 75%, #00D4B8 100%);
+            background-size: 200% auto;
+            animation: blink-wave 1.8s linear infinite;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 18px 44px rgba(0,212,184,.24);
+        }
         .btn-secondary {
             border: 1px solid #27272A; color: #E4E4E7; background: rgba(255,255,255,.02); border-radius: .85rem; transition: border-color .16s ease, transform .16s ease, background .16s ease;
         }
@@ -587,7 +594,7 @@
             <div class="card p-7"><p class="text-sm font-bold uppercase tracking-wider text-zinc-500">Next</p><p class="mt-3 text-3xl font-black">Pilot readiness</p><p class="mt-3 text-sm leading-7 text-zinc-400">Legal review, payment partner discussions, improved security hardening and merchant validation.</p></div>
         </div>
         <div class="shell mt-8 text-center">
-            <a href="BlinkPay_Pitch_Deck_Final.pdf" target="_blank" rel="noopener noreferrer" class="btn-primary inline-block px-8 py-3.5 text-sm no-underline">Review pitch deck</a>
+            <a href="BlinkPay_Pitch_Deck_Final.pdf" target="_blank" rel="noopener noreferrer" class="btn-primary inline-block px-8 py-3.5 text-sm no-underline">View Pitch Deck</a>
         </div>
     </section>
 </main>
