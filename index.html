@@ -133,6 +133,12 @@
         .step-number { display:inline-block; background:linear-gradient(90deg,#00D4B8,#4B7BFF 42%,#9B6DFF 68%,#FF2D78); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; text-shadow:0 0 28px rgba(0,212,184,.16); }
         .founder-link { color:#00D4B8; text-decoration:none; font-size:.78rem; font-weight:800; }
         .founder-link:hover { color:#FAFAFA; }
+        .za-gradient {
+            background: linear-gradient(90deg, #002395 0%, #007A4D 33%, #DE3831 72%, #FFD700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         @media (max-width: 640px) { .email-card { align-items: stretch; flex-direction: column; } .email-button { width: 100%; } }
     </style>
 </head>
@@ -140,7 +146,7 @@
 <header class="sticky top-0 z-50 border-b border-zinc-800/90 bg-[#09090B]/90 backdrop-blur-2xl">
     <div class="shell h-16 flex items-center justify-between">
         <button type="button" @click="go('home')" class="flex items-center gap-3 border-0 bg-transparent p-0 cursor-pointer" aria-label="Blink Pay home">
-            <img src="logo.png" alt="Blink Pay logo" class="h-10 w-10 rounded-xl object-cover ring-1 ring-white/10" />
+            <img src="logo.png" alt="Blink Pay logo" class="h-10 w-10 rounded-xl object-cover" />
             <div class="text-left leading-tight">
                 <div class="blink-title text-2xl md:text-3xl font-black tracking-tight">Blink Pay</div>
             </div>
@@ -182,9 +188,10 @@
 
         <div class="shell relative z-10 grid gap-12 lg:grid-cols-[1.06fr_.94fr] lg:items-center">
             <div class="text-center lg:text-left">
+                <p class="mx-auto lg:mx-0 mb-8 text-2xl sm:text-3xl font-black tracking-tight text-white/50">Simple. Secure. Instant.</p>
                 <div class="mx-auto lg:mx-0 mb-6 inline-flex items-center gap-2 rounded-full border border-teal-400/25 bg-teal-400/5 px-4 py-2 text-sm font-bold text-[#00D4B8]">
                     <span class="status-dot"></span>
-                    Early access fintech concept — built in South Africa
+                    Proudly South African.
                 </div>
 
                 <h1 class="max-w-4xl text-5xl font-black tracking-tight leading-[1.03] sm:text-6xl xl:text-7xl">
@@ -196,19 +203,19 @@
                 </p>
 
                 <div class="mt-9 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
-                    <button type="button" @click="go('contact')" class="btn-primary w-full px-8 py-3.5 text-sm sm:w-auto">Join early access</button>
+                    <button type="button" @click="go('contact')" class="btn-primary w-full px-8 py-3.5 text-sm sm:w-auto">Sign Up to the Future of Payments</button>
                     <button type="button" @click="go('product')" class="btn-secondary w-full px-8 py-3.5 text-sm font-bold sm:w-auto">See product flow</button>
                 </div>
 
                 <div class="mt-8 flex flex-wrap justify-center gap-2 lg:justify-start">
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Instant Pay</span>
-                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Wallets</span>
+                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Digital Wallet</span>
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Split Pay</span>
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Transaction Histories</span>
-                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">POPIA-aware</span>
-                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">B-BBEE verified</span>
-                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Business reporting</span>
-                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Personal reporting</span>
+                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">POPIA Compliant</span>
+                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">B-BBEE Verified</span>
+                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Business Reporting</span>
+                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Personal Reporting</span>
                 </div>
             </div>
 
@@ -223,7 +230,7 @@
                                 <p class="text-xs text-zinc-500">Demo account</p>
                             </div>
                         </div>
-                        <div class="rounded-full bg-teal-400/10 px-3 py-1 text-xs font-bold text-[#00D4B8]">Live</div>
+                        <div class="rounded-full bg-teal-400/10 px-3 py-1 text-xs font-bold text-[#00D4B8]">Live Demo Available</div>
                     </div>
 
                     <div class="rounded-3xl border border-white/10 bg-gradient-to-br from-teal-400/20 via-blue-500/10 to-pink-500/20 p-5">
@@ -263,57 +270,6 @@
         </div>
     </section>
 
-    <section class="border-y border-zinc-800 bg-zinc-950/40 py-16">
-        <div class="shell">
-            <div class="mx-auto mb-10 max-w-2xl text-center">
-                <p class="text-sm font-bold uppercase tracking-[.22em] text-[#00D4B8]">What the landing page should communicate</p>
-                <h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Simple product. Serious direction.</h2>
-                <p class="mt-4 text-zinc-400">This site gives investors, partners and early users a clean place to understand the vision without exposing the full application codebase.</p>
-            </div>
-            <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                <article class="card p-6">
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-400/10 text-[#00D4B8]">⚡</div>
-                    <h3 class="text-lg font-bold">Instant Pay</h3>
-                    <p class="mt-2 text-sm leading-7 text-zinc-400">Create a QR-style or manual payment request and keep the user or merchant experience lightweight.</p>
-                </article>
-                <article class="card p-6">
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-500/10 text-[#4B7BFF]">👛</div>
-                    <h3 class="text-lg font-bold">Wallets</h3>
-                    <p class="mt-2 text-sm leading-7 text-zinc-400">Give users a simple wallet view for balances, top-ups, movement and settlement history.</p>
-                </article>
-                <article class="card p-6">
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-pink-500/10 text-[#FF2D78]">👥</div>
-                    <h3 class="text-lg font-bold">Split Pay & Settle Up</h3>
-                    <p class="mt-2 text-sm leading-7 text-zinc-400">Track who owes what, reduce awkward follow-ups and settle balances from one shared flow.</p>
-                </article>
-                <article class="card p-6">
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/10 text-[#9B6DFF]">🛡️</div>
-                    <h3 class="text-lg font-bold">POPIA-aware</h3>
-                    <p class="mt-2 text-sm leading-7 text-zinc-400">Clear consent, minimal collection and visible privacy rights from the first public touchpoint.</p>
-                </article>
-                <article class="card p-6">
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-400/10 text-[#00D4B8]">📊</div>
-                    <h3 class="text-lg font-bold">Reporting</h3>
-                    <p class="mt-2 text-sm leading-7 text-zinc-400">Business users need merchant reporting; individuals need clean personal spend and settlement history.</p>
-                </article>
-                <article class="card p-6">
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-pink-500/10 text-[#FF2D78]">🇿🇦</div>
-                    <h3 class="text-lg font-bold">B-BBEE Verified</h3>
-                    <p class="mt-2 text-sm leading-7 text-zinc-400">Founded by two Indian South African owners. Formal B-BBEE verification can be completed before procurement discussions that require a certificate.</p>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-16">
-        <div class="shell grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="card metric p-6 text-center" style="border-bottom-color:#00D4B8"><p class="text-4xl font-black">4</p><p class="mt-2 text-xs font-bold uppercase tracking-wider text-zinc-500">Core flows</p></div>
-            <div class="card metric p-6 text-center" style="border-bottom-color:#4B7BFF"><p class="text-4xl font-black">0</p><p class="mt-2 text-xs font-bold uppercase tracking-wider text-zinc-500">Card machines needed</p></div>
-            <div class="card metric p-6 text-center" style="border-bottom-color:#9B6DFF"><p class="text-4xl font-black">POC</p><p class="mt-2 text-xs font-bold uppercase tracking-wider text-zinc-500">Investor demo stage</p></div>
-            <div class="card metric p-6 text-center" style="border-bottom-color:#FF2D78"><p class="text-4xl font-black">ZA</p><p class="mt-2 text-xs font-bold uppercase tracking-wider text-zinc-500">Local market focus</p></div>
-        </div>
-    </section>
-
     <section class="px-5 pb-20">
         <div class="shell rounded-[2rem] border border-teal-400/15 bg-gradient-to-br from-teal-400/10 via-zinc-950 to-pink-500/10 p-8 text-center sm:p-12">
             <h2 class="text-3xl font-black tracking-tight sm:text-4xl">Have a reason to talk?</h2>
@@ -331,8 +287,8 @@
         <div class="blob blob-purple -top-32 left-1/2 h-[520px] w-[520px] -translate-x-1/2"></div>
         <div class="shell relative z-10 max-w-4xl text-center">
             <p class="text-sm font-bold uppercase tracking-[.24em] text-[#00D4B8]">About Blink Pay</p>
-            <h1 class="mt-4 text-5xl font-black tracking-tight sm:text-6xl">Built for <span class="gradient-text">real South African payment habits.</span></h1>
-            <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400">Blink Pay started as a practical POC: make money movement feel simple, familiar and safe for everyday users, small merchants, groups and informal transactions.</p>
+            <h1 class="mt-4 text-5xl font-black tracking-tight sm:text-6xl">Built for <span class="gradient-text">real South African transactions.</span></h1>
+            <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400">Make money movement feel simple, familiar and safe for everyday users, merchants, groups and informal transactions.</p>
         </div>
     </section>
 
@@ -341,38 +297,39 @@
             <article class="card p-7">
                 <p class="text-sm font-bold uppercase tracking-wider text-[#00D4B8]">Problem</p>
                 <h2 class="mt-3 text-2xl font-black">Payments are still too fragmented.</h2>
-                <p class="mt-4 text-sm leading-7 text-zinc-400">People use cash, EFTs, payment links, banking apps, WhatsApp screenshots and informal reminders. Small merchants and friend groups need one cleaner layer for requesting, tracking and settling payments.</p>
+                <p class="mt-4 text-sm leading-7 text-zinc-400">People use cash, EFTs, payment links, banking apps, WhatsApp screenshots, informal reminders and have to wait on banking delays with large startup costs. Merchants and friend groups need one cleaner layer for requesting, tracking and settling payments, instant.</p>
             </article>
             <article class="card p-7">
                 <p class="text-sm font-bold uppercase tracking-wider text-[#FF2D78]">Approach</p>
-                <h2 class="mt-3 text-2xl font-black">Start with the flows people understand.</h2>
+                <h2 class="mt-3 text-2xl font-black">Simplify the complicated.<br>Reduce the cost.</h2>
                 <p class="mt-4 text-sm leading-7 text-zinc-400">Wallet view, instant pay, payment requests, split pay, debt settlement and clean transaction history. Then integrate regulated rails through the right licensed partners when moving beyond simulation.</p>
             </article>
-        </div>
-    </section>
-
-    <section class="py-16">
-        <div class="shell">
-            <div class="mb-9 max-w-2xl">
-                <p class="text-sm font-bold uppercase tracking-[.22em] text-[#00D4B8]">What matters</p>
-                <h2 class="mt-3 text-3xl font-black tracking-tight">The site should signal product maturity, not just a pretty idea.</h2>
-            </div>
-            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="soft-card p-5"><p class="font-bold">Demo-ready</p><p class="mt-2 text-sm leading-6 text-zinc-400">A public explainer that supports investor and partner conversations.</p></div>
-                <div class="soft-card p-5"><p class="font-bold">Compliance-aware</p><p class="mt-2 text-sm leading-6 text-zinc-400">POPIA consent, retention wording and user rights are visible from the start.</p></div>
-                <div class="soft-card p-5"><p class="font-bold">No over-complexity</p><p class="mt-2 text-sm leading-6 text-zinc-400">Single static HTML file. Easy to host on GitHub Pages.</p></div>
-                <div class="soft-card p-5"><p class="font-bold">App-aligned</p><p class="mt-2 text-sm leading-6 text-zinc-400">Matches the dark, neon, polished style direction of the main app.</p></div>
-            </div>
         </div>
     </section>
 
     <section class="border-t border-zinc-800 py-16">
         <div class="shell text-center">
             <p class="text-sm font-bold uppercase tracking-[.22em] text-zinc-500">Founding team</p>
-            <h2 class="mt-3 text-3xl font-black">Built by a small technical team.</h2>
+            <h2 class="mt-3 text-3xl font-black">Designed and Built by an engineering-backed team.</h2>
             <div class="mx-auto mt-10 grid max-w-2xl gap-5 sm:grid-cols-2">
-                <div class="card p-7 transition hover:-translate-y-1 hover:border-teal-400/35"><div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-teal-400/10 text-3xl">👤</div><p class="font-bold">Mohamed Asmall</p><p class="mt-1 text-sm text-zinc-400">Co-founder & CEO</p><a class="founder-link mt-3 inline-block" href="mailto:contactus@blinkpay.co.za" target="_blank" rel="noopener noreferrer">View Email Contact →</a></div>
-                <div class="card p-7 transition hover:-translate-y-1 hover:border-pink-500/35"><div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-pink-500/10 text-3xl">👤</div><p class="font-bold">Ammaar Peerbhai</p><p class="mt-1 text-sm text-zinc-400">Co-founder & CTO</p><a class="founder-link mt-3 inline-block" href="mailto:contactus@blinkpay.co.za" target="_blank" rel="noopener noreferrer">View Email Contact →</a></div>
+                <div class="card group relative overflow-hidden p-7 transition hover:-translate-y-1 hover:border-teal-400/35">
+                    <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-teal-400/10 text-3xl">👤</div>
+                    <p class="font-bold">Mohamed Asmall</p>
+                    <p class="mt-1 text-sm text-zinc-400">Co-founder &amp; CEO</p>
+                    <div class="absolute inset-0 flex flex-col justify-center rounded-[1.25rem] bg-[#141417]/95 p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <p class="mb-2 text-xs font-bold uppercase tracking-wider" style="color:#00D4B8;">Mohamed Asmall · CEO</p>
+                        <p class="text-xs leading-5 text-zinc-300">Coming from an engineering background, then starting and running his own business, Mohamed encountered first-hand the payment friction facing South African businesses. He founded Blink Pay to solve those issues — reducing cost and complexity for merchants and every individual South African.</p>
+                    </div>
+                </div>
+                <div class="card group relative overflow-hidden p-7 transition hover:-translate-y-1 hover:border-pink-500/35">
+                    <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-pink-500/10 text-3xl">👤</div>
+                    <p class="font-bold">Ammaar Peerbhai</p>
+                    <p class="mt-1 text-sm text-zinc-400">Co-founder &amp; CTO</p>
+                    <div class="absolute inset-0 flex flex-col justify-end rounded-[1.25rem] bg-[#141417]/95 p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <p class="mb-1 text-xs font-bold uppercase tracking-wider" style="color:#FF2D78;">Ammaar Peerbhai · CTO</p>
+                        <p class="text-sm leading-6 text-zinc-300">A software engineer with a specialisation in fintech, Ammaar has over 2 years of hands-on experience as a developer within the banking space — working at the core of logical flows, security architecture and integration with external financial systems.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -385,36 +342,23 @@
         <div class="shell relative z-10 max-w-4xl">
             <p class="text-sm font-bold uppercase tracking-[.24em] text-[#00D4B8]">Product flow</p>
             <h1 class="mt-4 text-5xl font-black tracking-tight sm:text-6xl">Direct rails. <span class="gradient-text">Instant power.</span></h1>
-            <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400">A software-first payment experience built around Instant Pay, wallet movement, QR/manual requests, split expenses, clean settlement and reporting.</p>
+            <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400">A software-first payment experience built around Instant Pay, Wallet Movement, QR Codes, Manual Requests, Split Expenses, Clean Settlement and Reporting.</p>
             <div class="mx-auto mt-8 flex max-w-3xl flex-wrap justify-center gap-2">
-                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">No hardware rentals</span>
-                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">1% flat-fee target</span>
-                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Instant settlement vision</span>
-                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Ethical fee-for-service model</span>
+                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">1% Flat-Fee Target</span>
+                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Instant Settlement</span>
+                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">No Joining Cost</span>
+                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">No Specialised Hardware</span>
+                <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Ethically built. Ethically managed. </span>
             </div>
         </div>
     </section>
 
     <section class="pb-16">
         <div class="shell grid gap-5 md:grid-cols-4">
-            <div class="card p-6 border-t-2 border-t-[#00D4B8]"><span class="step-number text-4xl font-black">01</span><h3 class="mt-4 font-bold">Create request</h3><p class="mt-2 text-sm leading-6 text-zinc-400">Customer scans a QR code, or the user or merchant manually enters an amount, reference and recipient.</p></div>
-            <div class="card p-6 border-t-2 border-t-[#4B7BFF]"><span class="step-number text-4xl font-black">02</span><h3 class="mt-4 font-bold">Approve flow</h3><p class="mt-2 text-sm leading-6 text-zinc-400">The payer confirms the request using the app flow or future payment rail integration.</p></div>
-            <div class="card p-6 border-t-2 border-t-[#9B6DFF]"><span class="step-number text-4xl font-black">03</span><h3 class="mt-4 font-bold">Track status</h3><p class="mt-2 text-sm leading-6 text-zinc-400">The dashboard shows transaction history, pending debts and wallet movement.</p></div>
-            <div class="card p-6 border-t-2 border-t-[#FF2D78]"><span class="step-number text-4xl font-black">04</span><h3 class="mt-4 font-bold">Settle cleanly</h3><p class="mt-2 text-sm leading-6 text-zinc-400">Users settle balances without manual reminders or screenshots.</p></div>
-        </div>
-    </section>
-
-    <section class="border-y border-zinc-800 bg-zinc-950/40 py-16">
-        <div class="shell">
-            <div class="mx-auto max-w-3xl card overflow-hidden">
-                <div class="grid grid-cols-3 border-b border-zinc-800 bg-black/20 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                    <div class="p-4">Capability</div><div class="border-l border-zinc-800 p-4">Current POC</div><div class="border-l border-teal-400/20 bg-teal-400/5 p-4 text-[#00D4B8]">Next stage</div>
-                </div>
-                <div class="grid grid-cols-3 border-b border-zinc-800 text-sm"><div class="p-4 font-bold">Wallet</div><div class="border-l border-zinc-800 p-4 text-zinc-400">Simulated balances</div><div class="border-l border-teal-400/20 bg-teal-400/5 p-4 text-zinc-300">Rails-backed ledger</div></div>
-                <div class="grid grid-cols-3 border-b border-zinc-800 text-sm"><div class="p-4 font-bold">Payment requests</div><div class="border-l border-zinc-800 p-4 text-zinc-400">App-to-app demo</div><div class="border-l border-teal-400/20 bg-teal-400/5 p-4 text-zinc-300">Partner payment initiation</div></div>
-                <div class="grid grid-cols-3 border-b border-zinc-800 text-sm"><div class="p-4 font-bold">Split pay</div><div class="border-l border-zinc-800 p-4 text-zinc-400">Debt tracking</div><div class="border-l border-teal-400/20 bg-teal-400/5 p-4 text-zinc-300">Automated settlement</div></div>
-                <div class="grid grid-cols-3 text-sm"><div class="p-4 font-bold">Compliance</div><div class="border-l border-zinc-800 p-4 text-zinc-400">Privacy-first design</div><div class="border-l border-teal-400/20 bg-teal-400/5 p-4 text-zinc-300">Formal legal review</div></div>
-            </div>
+            <div class="card p-6 border-t-2 border-t-[#00D4B8]"><span class="step-number text-4xl font-black">01</span><h3 class="mt-4 font-bold">Create Request</h3><p class="mt-2 text-sm leading-6 text-zinc-400">Customer scans a QR code, or the user or merchant manually enters an amount, reference and recipient.</p></div>
+            <div class="card p-6 border-t-2 border-t-[#4B7BFF]"><span class="step-number text-4xl font-black">02</span><h3 class="mt-4 font-bold">Approve Transaction</h3><p class="mt-2 text-sm leading-6 text-zinc-400">The payer confirms the request using the app flow or future payment rail integration.</p></div>
+            <div class="card p-6 border-t-2 border-t-[#9B6DFF]"><span class="step-number text-4xl font-black">03</span><h3 class="mt-4 font-bold">Track Status</h3><p class="mt-2 text-sm leading-6 text-zinc-400">The dashboard shows transaction history, pending debts and wallet movement.</p></div>
+            <div class="card p-6 border-t-2 border-t-[#FF2D78]"><span class="step-number text-4xl font-black">04</span><h3 class="mt-4 font-bold">Settle Cleanly</h3><p class="mt-2 text-sm leading-6 text-zinc-400">Users settle balances without manual reminders or screenshots.</p></div>
         </div>
     </section>
 
@@ -511,29 +455,21 @@
                         <span><span class="label">Direct email</span><span class="email block">contactus@blinkpay.co.za</span></span>
                         <span class="email-button secondary">Email</span>
                     </a>
-                    <a class="email-card no-underline" href="mailto:contactus@blinkpay.co.za?subject=Blink%20Pay%20Business%20%2F%20Market%20%2F%20Finance%20Enquiry">
-                        <span><span class="label">Business, market & finance</span><span class="email block">Mohamed Asmall · CEO</span></span>
-                        <span class="email-button secondary">Email</span>
-                    </a>
-                    <a class="email-card no-underline" href="mailto:contactus@blinkpay.co.za?subject=Blink%20Pay%20Technical%20%2F%20Product%20%2F%20Integration%20Enquiry">
-                        <span><span class="label">Technical, product & integrations</span><span class="email block">Ammaar Peerbhai · CTO</span></span>
-                        <span class="email-button secondary">Email</span>
-                    </a>
                 </div>
             </div>
 
             <div class="card p-6 sm:p-8">
                 <div class="rounded-3xl border border-teal-400/20 bg-gradient-to-br from-teal-400/10 via-zinc-950 to-pink-500/10 p-7 text-center sm:p-9">
-                    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-400/10 text-3xl">
-                        ✨
+                    <div class="mt-4 text-4xl font-black tracking-tight sm:text-4xl">
+                        Join the <span class="gradient-text">Payment Revolution</span>
                     </div>
 
                     <p class="text-sm font-bold uppercase tracking-[.22em] text-[#00D4B8]">
-                        Join the waitlist
+                        Get on the waitlist
                     </p>
 
                     <h2 class="mt-3 text-3xl font-black tracking-tight">
-                        Tell us how you want to use Blink Pay.
+                        Tell us how <span class="gradient-text">you</span> want to use Blink Pay.
                     </h2>
 
                     <p class="mx-auto mt-4 max-w-md text-sm leading-7 text-zinc-400">
@@ -582,19 +518,23 @@
         <div class="blob blob-purple bottom-0 left-0 h-[440px] w-[440px]"></div>
         <div class="shell relative z-10 max-w-4xl text-center">
             <p class="text-sm font-bold uppercase tracking-[.24em] text-[#9B6DFF]">Investor brief</p>
-            <h1 class="mt-4 text-5xl font-black tracking-tight sm:text-6xl">A focused POC for a much bigger payment opportunity.</h1>
-            <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400">Blink Pay is currently positioned as an investable demo: prove the user experience, validate demand, refine compliance and then integrate with the correct regulated payment partners.</p>
+            <h1 class="mt-4 text-5xl font-black tracking-tight sm:text-6xl">The Future of <span class="gradient-text">Pay</span></h1>
+            <p class="mx-auto mt-6 max-w-2xl text-2xl leading-8 text-zinc-400">Blink Pay is currently ready to bring the payment revolution to
+                <span class="za-gradient text-7xl sm:text-5xl font-black italic">MZANSI</span></p>
         </div>
     </section>
 
     <section class="pb-20">
         <div class="shell grid gap-5 md:grid-cols-3">
-            <div class="card p-7"><p class="text-sm font-bold uppercase tracking-wider text-zinc-500">Stage</p><p class="mt-3 text-3xl font-black">POC / Demo</p><p class="mt-3 text-sm leading-7 text-zinc-400">Backend and frontend direction already underway, with simulated wallet and settlement flows.</p></div>
-            <div class="card p-7"><p class="text-sm font-bold uppercase tracking-wider text-zinc-500">Focus</p><p class="mt-3 text-3xl font-black">SA payments</p><p class="mt-3 text-sm leading-7 text-zinc-400">Consumer-to-consumer, group payments and merchant-friendly use cases.</p></div>
-            <div class="card p-7"><p class="text-sm font-bold uppercase tracking-wider text-zinc-500">Next</p><p class="mt-3 text-3xl font-black">Pilot readiness</p><p class="mt-3 text-sm leading-7 text-zinc-400">Legal review, payment partner discussions, improved security hardening and merchant validation.</p></div>
+            <div class="card p-7"><p class="text-sm font-bold uppercase tracking-wider text-zinc-500">Stage</p><p class="mt-3 text-3xl font-black">Getting Market-Ready</p><p class="mt-3 text-sm leading-7 text-zinc-400">Acquiring licensing and relevant integrations.</p></div>
+            <div class="card p-7"><p class="text-sm font-bold uppercase tracking-wider text-zinc-500">Focus</p><p class="mt-3 text-3xl font-black">SA Instant Payments</p><p class="mt-3 text-sm leading-7 text-zinc-400">Instant Business-to-Business, Consumer-to-Business and Chomie-to-Chomie payments for individual and merchant-friendly use cases.</p></div>
+            <div class="card p-7"><p class="text-sm font-bold uppercase tracking-wider text-zinc-500">Next</p><p class="mt-3 text-3xl font-black">Pilot Readiness</p><p class="mt-3 text-sm leading-7 text-zinc-400">Legal review, payment partner discussions, payment rail integration and merchant validation.</p></div>
         </div>
         <div class="shell mt-8 text-center">
-            <a href="BlinkPay_Pitch_Deck_Final.pdf" target="_blank" rel="noopener noreferrer" class="btn-primary inline-block px-8 py-3.5 text-sm no-underline">View Pitch Deck</a>
+            <a href="https://forms.gle/qjuiuZBLWddWgUPy6"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn-primary inline-block px-8 py-3.5 text-sm no-underline">Request Pitch Deck</a>
         </div>
     </section>
 </main>
@@ -608,8 +548,7 @@
         <button class="border-0 bg-transparent cursor-pointer hover:text-zinc-300" @click="go('privacy')">POPIA</button>
         <button class="border-0 bg-transparent cursor-pointer hover:text-zinc-300" @click="go('contact')">Contact</button>
     </div>
-    <p class="text-xs text-zinc-600">© 2026 Blink Pay. South Africa.</p>
-    <p class="mx-auto mt-2 max-w-2xl text-xs leading-6 text-zinc-700">Public landing page for an early-stage fintech concept / POC. Live-money payment services require the correct licensed partners, legal review and regulatory alignment.</p>
+    <p class="text-xs text-zinc-600">© 2026 Blink Pay (PTY) Ltd. South Africa.</p>
 </footer>
 
 <script>
