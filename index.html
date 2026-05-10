@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blink Pay | Payments, Wallets & Split Pay for South Africa</title>
-    <meta name="description" content="Blink Pay is an early-stage South African payments concept for instant pay, QR-style payments, wallet top-ups, split expenses, debt settlement and merchant-friendly digital payments." />
+    <meta name="description" content="Blink Pay is an early-stage South African payments Startup for instant pay, QR-style payments, wallet top-ups, split expenses, debt settlement and merchant-friendly digital payments." />
     <meta name="theme-color" content="#09090B" />
     <meta property="og:title" content="Blink Pay | Payments built for South Africa" />
-    <meta property="og:description" content="A lightweight digital payments platform concept for instant pay, QR payments, split expenses and merchant-friendly settlement flows." />
+    <meta property="og:description" content="A lightweight digital payments platform for instant pay, QR payments, split expenses and merchant-friendly settlement flows." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="logo.png" />
     <link rel="icon" href="logo.png" />
@@ -257,7 +257,7 @@
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Split Pay</span>
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Transaction Histories</span>
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">POPIA Compliant</span>
-                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">B-BBEE Verified</span>
+                    <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">B-BBEE Level 1</span>
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Business Reporting</span>
                     <span class="mini-pill px-3 py-1.5 text-xs font-bold text-zinc-400">Personal Reporting</span>
                 </div>
@@ -436,7 +436,7 @@
         <div class="shell max-w-3xl space-y-5">
             <div class="card border-l-4 border-l-[#00D4B8] p-7 reveal">
                 <h3>1. Responsible party and contact</h3>
-                <p class="mb-5">Blink Pay is an early-stage South African fintech concept. For privacy questions, access requests, correction requests, deletion requests or withdrawal of consent, reach out through the general contact channel below. The team will route POPIA-related matters to the right founder or responsible person.</p>
+                <p class="mb-5">Blink Pay is an early-stage South African fintech startup. For privacy questions, access requests, correction requests, deletion requests or withdrawal of consent, reach out through the general contact channel below. The team will route POPIA-related matters to the right founder or responsible person.</p>
                 <div class="space-y-3">
                     <div class="email-card">
                         <div>
@@ -458,7 +458,7 @@
             </div>
             <div class="card p-7 reveal">
                 <h3>3. Why we process it</h3>
-                <p>We process information to respond to enquiries, manage the waitlist, understand pilot/investor interest, improve the product concept, maintain site security and prepare for future regulated payment integration discussions.</p>
+                <p>We process information to respond to enquiries, manage the waitlist, understand pilot/investor interest, improve the product, maintain site security and prepare for future regulated payment integration discussions.</p>
             </div>
             <div class="card p-7 reveal">
                 <h3>4. Sharing and retention</h3>
@@ -474,8 +474,8 @@
                 <p>We aim to use proportionate technical and organisational safeguards, including access control, secure hosting practices, encrypted transport where supported, limited collection and restricted internal access.</p>
             </div>
             <div class="card p-7 reveal">
-                <h3>7. B-BBEE Certification</h3>
-                <p>Blink Pay is certified as a B-BBEE Level 1 Contributor. This status enables our clients and partners to claim 135% procurement recognition on their qualifying spend.</p>
+                <h3>7. B-BBEE Certification & Verification</h3>
+                <p>Blink Pay is certified as a B-BBEE Level 1 Contributor. This status enables our clients and partners to claim 135% procurement recognition on their qualifying spend. Any personal or enterprise data processed during the verification of our B-BBEE status is used strictly for regulatory compliance and procurement transparency in accordance with POPIA.</p>
             </div>
         </div>
     </section>
@@ -572,6 +572,18 @@
         <button class="border-0 bg-transparent cursor-pointer hover:text-zinc-300" @click="go('privacy')">POPIA</button>
         <button class="border-0 bg-transparent cursor-pointer hover:text-zinc-300" @click="go('contact')">Contact</button>
     </div>
+    
+        <div class="mb-6 flex flex-wrap justify-center gap-4">
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 px-3 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                <svg class="w-3.5 h-3.5 text-[#00D4B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Pretoria Born
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 px-3 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                <svg class="w-3.5 h-3.5 text-[#4B7BFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                B-BBEE Level 1
+            </span>
+        </div>
+
     <p class="text-xs text-zinc-600">© 2026 Blink Pay (PTY) Ltd. South Africa.</p>
 </footer>
 
@@ -589,8 +601,10 @@
                 { id: 'investors', label: 'Investors' }
             ],
             faqs: [
-                { q: 'What makes Blink Pay different?', a: 'The concept is software-first: reduce hardware dependence, keep pricing transparent and make the payment request flow simple enough for users, small merchants and groups.' },
+                { q: 'What makes Blink Pay different?', a: 'The technology is software-first: reduce hardware dependence, keep pricing transparent and make the payment request flow simple enough for users, small merchants and groups.' },
                 { q: 'What does ethical fee-for-service mean?', a: 'The model is positioned around a clear service fee rather than hidden charges, interest-based debt or confusing cost structures.' },
+                { q: 'How does Blink Pay support local businesses?', a: 'As a Level 1 B-BBEE contributor born in South Africa, we are dedicated to providing affordable, transparent payment infrastructure tailored for the South African market.' }
+
             ],
             init() {
                 const allowed = this.navItems.map(i => i.id);
